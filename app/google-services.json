@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "993658549778",
+    "project_id": "doctorsalud-b4711",
+    "storage_bucket": "doctorsalud-b4711.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:993658549778:android:952b6739c3204f50d4cacb",
+        "android_client_info": {
+          "package_name": "com.miyo.doctorsaludapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "993658549778-hmjtti8rjip0qbopcmfqk95i9ke39iho.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.miyo.doctorsaludapp",
+            "certificate_hash": "8368aafdcce308d3b4747cf0f5d4fa9b981b5f52"
+          }
+        },
+        {
+          "client_id": "993658549778-d43et35c2njikr4s6e44fjl6hds3usl1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7qlpxPNFgue1QIwZyZxkUMFLo4x6Z3v8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "993658549778-d43et35c2njikr4s6e44fjl6hds3usl1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

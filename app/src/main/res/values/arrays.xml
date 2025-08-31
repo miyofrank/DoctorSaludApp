@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="dolor_pecho_array">
+        <item>Typical angina</item>
+        <item>Atypical angina</item>
+        <item>Non-anginal pain</item>
+        <item>Asymptomatic</item>
+    </string-array>
+    <string-array name="azucar_en_sangre_array">
+        <item>Lower than 120 mg/ml</item>
+        <item>Greater than 120 mg/ml</item>
+    </string-array>
+    <string-array name="rest_ecg_array">
+        <item>Normal</item>
+        <item>ST-T wave abnormality</item>
+        <item>Left ventricular hypertrophy</item>
+    </string-array>
+    <string-array name="angina_ejercicio_array">
+        <item>No</item>
+        <item>Yes</item>
+    </string-array>
+    <string-array name="pendiente_array">
+        <item>Upsloping</item>
+        <item>Flat</item>
+        <item>Downsloping</item>
+    </string-array>
+    <string-array name="vasos_coloreados_array">
+        <item>Zero</item>
+        <item>One</item>
+        <item>Two</item>
+        <item>Three</item>
+    </string-array>
+    <string-array name="talasemia_array">
+        <item>Normal</item>
+        <item>Fixed Defect</item>
+        <item>Reversable Defect</item>
+    </string-array>
+</resources>

@@ -3,7 +3,6 @@ package com.miyo.doctorsaludapp.presentation.view.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +15,7 @@ class PacienteActivity : AppCompatActivity() {
     private val viewModel: RegisterViewModel by viewModels()
     private var imageUri: Uri? = null
     private val PICK_IMAGE_REQUEST = 1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.setFlags(
@@ -24,9 +24,15 @@ class PacienteActivity : AppCompatActivity() {
         )
         binding = ActivityPacienteBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         binding.profileImageView.setOnClickListener {
             openFileChooser()
         }
+
+        binding.btnCancel.setOnClickListener {
+            finish()
+        }
+
         binding.btnRegister.setOnClickListener {
             val name = binding.etName.text.toString()
             val surname = binding.etSurname.text.toString()
@@ -41,14 +47,12 @@ class PacienteActivity : AppCompatActivity() {
             viewModel.registerPatient(name, surname, email, address, age, date, gender, phone, imageUri)
             startActivity(Intent(this, HomeActivity::class.java))
         }
-        }
+    }
+
     private fun openFileChooser() {
         val intent = Intent()
         intent.type = "image/*"
         intent.action = Intent.ACTION_GET_CONTENT
         startActivityForResult(intent, PICK_IMAGE_REQUEST)
     }
-    }
-
-
-
+}

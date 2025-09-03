@@ -1,189 +1,469 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".presentation.view.Activity.PacienteActivity">
-
-    <ImageView
-        android:id="@+id/logo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="-120dp"
-        android:src="@drawable/fondopaciente"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
+    android:layout_height="match_parent">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/background_gradient_login"
-        android:orientation="vertical">
+        android:id="@+id/header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <TextView
-            android:id="@+id/textView2"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/login_icon_background"
+            android:gravity="center"
+            android:text="E"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="80dp"
-            android:paddingStart="20dp"
-            android:text="Registrar Paciente"
-            android:textColor="@color/black"
-            android:textSize="56sp"
+            android:layout_marginStart="8dp"
+            android:gravity="center_vertical"
+            android:text="EvalIA"
+            android:textSize="20sp"
             android:textStyle="bold" />
+    </LinearLayout>
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="30dp"
-            android:text="Enter Patient Data"
-            android:textColor="@color/gray"
-            android:textSize="20sp" />
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Registrar paciente"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
+    <TextView
+        android:id="@+id/subtitleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Complete la información del paciente para la evaluación preoperatoria"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/titleText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-        <ScrollView
+    <ScrollView
+        android:id="@+id/patientScroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="80dp"
+        app:layout_constraintTop_toBottomOf="@id/subtitleText"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
+
+            <!-- Datos personales -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="0dp"
+                android:background="@drawable/login_input_background"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Datos personales"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etDni"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/login_input_background"
+                    android:hint="DNI *"
+                    android:inputType="number"
+                    android:padding="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/etName"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/login_input_background"
+                        android:hint="Nombres *"
+                        android:inputType="textPersonName"
+                        android:padding="12dp" />
+
+                    <EditText
+                        android:id="@+id/etSurname"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/login_input_background"
+                        android:hint="Apellidos *"
+                        android:inputType="textPersonName"
+                        android:padding="12dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/etAge"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/login_input_background"
+                        android:hint="Edad *"
+                        android:inputType="number"
+                        android:padding="12dp" />
+
+                    <Spinner
+                        android:id="@+id/spBlood"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/login_input_background"
+                        android:entries="@array/blood_type_array" />
+                </LinearLayout>
+
+                <!-- Hidden fields for existing functionality -->
+                <EditText
+                    android:id="@+id/etEmail"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
+
+                <EditText
+                    android:id="@+id/etAddress"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
+
+                <EditText
+                    android:id="@+id/etDate"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
+
+                <EditText
+                    android:id="@+id/etGender"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
+
+                <EditText
+                    android:id="@+id/etPhone"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Antecedentes médicos -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/login_input_background"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Antecedentes médicos"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etAllergies"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/login_input_background"
+                    android:hint="Alergias"
+                    android:padding="12dp" />
+
+                <EditText
+                    android:id="@+id/etMedications"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/login_input_background"
+                    android:hint="Medicamentos actuales"
+                    android:padding="12dp" />
+
+                <EditText
+                    android:id="@+id/etChronicDiseases"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/login_input_background"
+                    android:hint="Enfermedades crónicas"
+                    android:padding="12dp" />
+
+                <EditText
+                    android:id="@+id/etSurgeries"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/login_input_background"
+                    android:hint="Cirugías previas"
+                    android:padding="12dp" />
+
+                <EditText
+                    android:id="@+id/etFamilyHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/login_input_background"
+                    android:hint="Antecedentes familiares"
+                    android:padding="12dp" />
+            </LinearLayout>
+
+            <!-- Cirugía programada -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/login_input_background"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cirugía programada"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etSurgeryType"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/login_input_background"
+                    android:hint="Tipo de cirugía *"
+                    android:padding="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/etDate"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/login_input_background"
+                        android:hint="Fecha programada *"
+                        android:padding="12dp" />
+
+                    <EditText
+                        android:id="@+id/etDuration"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/login_input_background"
+                        android:hint="Duración estimada (min)"
+                        android:inputType="number"
+                        android:padding="12dp" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/etAnesthesiaType"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/login_input_background"
+                    android:hint="Tipo de anestesia *"
+                    android:padding="12dp" />
+
+                <EditText
+                    android:id="@+id/etUrgency"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/login_input_background"
+                    android:hint="Urgencia *"
+                    android:padding="12dp" />
+
+                <EditText
+                    android:id="@+id/etSurgeon"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/login_input_background"
+                    android:hint="Cirujano *"
+                    android:padding="12dp" />
+            </LinearLayout>
+
+            <!-- Electrocardiograma -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/login_input_background"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Electrocardiograma (ECG)"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/profileImageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/login_input_background"
+                    android:scaleType="center"
+                    android:src="@drawable/ic_menu_gallery" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:text="Toca para cargar ECG\nJPG, PNG, PDF hasta 10MB"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- Exámenes complementarios -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/login_input_background"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Exámenes complementarios"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etExamResults"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/login_input_background"
+                    android:hint="Resultados de exámenes"
+                    android:padding="12dp" />
+
+                <Button
+                    android:id="@+id/uploadExamButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:backgroundTint="#356DE4"
+                    android:text="Cargar archivos de exámenes"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white" />
+            </LinearLayout>
+
+            <!-- Notas adicionales -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/login_input_background"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Notas adicionales"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etAdditionalNotes"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/login_input_background"
+                    android:gravity="top|start"
+                    android:hint="Información adicional relevante para la evaluación preoperatoria..."
+                    android:padding="12dp" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <ImageView
-                    android:id="@+id/profileImageView"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="18dp"
-                    android:layout_marginTop="18dp"
-                    android:layout_marginEnd="18dp"
-                    android:layout_marginBottom="10dp"
-                    android:src="@drawable/com_facebook_profile_picture_blank_square" />
-                <EditText
-                    android:id="@+id/etName"
-                    android:layout_width="330dp"
-                    android:layout_height="45dp"
-                    android:layout_gravity="center"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/sombra"
-                    android:hint="Nombre"
-                    android:paddingStart="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
 
-                <EditText
-                    android:id="@+id/etSurname"
-                    android:layout_width="330dp"
-                    android:layout_height="45dp"
-                    android:layout_gravity="center"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/sombra"
-                    android:hint="Apellidos"
-                    android:paddingStart="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
+                <Button
+                    android:id="@+id/btnCancel"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:text="Cancelar" />
 
-                <EditText
-                    android:id="@+id/etEmail"
-                    android:layout_width="330dp"
-                    android:layout_height="45dp"
-                    android:layout_gravity="center"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/sombra"
-                    android:hint="Correo"
-                    android:paddingStart="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <EditText
-                    android:id="@+id/etAddress"
-                    android:layout_width="330dp"
-                    android:layout_height="45dp"
-                    android:layout_gravity="center"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/sombra"
-                    android:hint="Direccion"
-                    android:paddingStart="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <EditText
-                    android:id="@+id/etAge"
-                    android:layout_width="330dp"
-                    android:layout_height="45dp"
-                    android:layout_gravity="center"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/sombra"
-                    android:hint="Edad"
-                    android:maxLength="3"
-                    android:numeric="integer"
-                    android:paddingStart="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <EditText
-                    android:id="@+id/etDate"
-                    android:layout_width="330dp"
-                    android:layout_height="45dp"
-                    android:layout_gravity="center"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/sombra"
-                    android:hint="Fecha de nacimiento"
-                    android:paddingStart="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <EditText
-                    android:id="@+id/etGender"
-                    android:layout_width="330dp"
-                    android:layout_height="45dp"
-                    android:layout_gravity="center"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/sombra"
-                    android:hint="Género"
-                    android:paddingStart="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <EditText
-                    android:id="@+id/etPhone"
-                    android:layout_width="330dp"
-                    android:layout_height="45dp"
-                    android:layout_gravity="center"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/sombra"
-                    android:hint="Teléfono"
-                    android:maxLength="9"
-                    android:numeric="integer"
-                    android:paddingStart="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
                 <Button
                     android:id="@+id/btnRegister"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="10dp"
-                    android:backgroundTint="@color/black"
-                    android:text="Registrar"
-                    android:textColor="@color/white" />
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#356DE4"
+                    android:text="Registrar paciente"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white" />
             </LinearLayout>
-
-        </ScrollView>
-
-
-    </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

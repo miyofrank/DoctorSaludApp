@@ -14,8 +14,8 @@ import com.miyo.doctorsaludapp.presentation.view.Adapter.ViewPagerAdapter
 import com.miyo.doctorsaludapp.presentation.view.Fragment.AnalisisFragment
 import com.miyo.doctorsaludapp.presentation.view.Fragment.ChatFragment
 import com.miyo.doctorsaludapp.presentation.view.Fragment.HomeFragment
-import com.miyo.doctorsaludapp.presentation.view.Fragment.ImagenAiFragment
 import com.miyo.doctorsaludapp.presentation.view.Fragment.PacienteFragment
+import com.miyo.doctorsaludapp.presentation.view.Fragment.PerfilFragment
 
 class HomeActivity : AppCompatActivity() {
 
@@ -33,9 +33,9 @@ class HomeActivity : AppCompatActivity() {
 
         val fragments = listOf(
             HomeFragment(),
-            AnalisisFragment(),
             PacienteFragment(),
-            ImagenAiFragment(),
+            AnalisisFragment(),
+            PerfilFragment(),
             ChatFragment()
         )
 
@@ -46,17 +46,17 @@ class HomeActivity : AppCompatActivity() {
         TabLayoutMediator(tabLayout, binding.viewPager) { tab, position ->
             when (position) {
                 0 -> tab.text = "Home"
-                1 -> tab.text = "Analisis"
-                2 -> tab.text = "Paciente"
-                3 -> tab.text = "Imagen AI"
+                1 -> tab.text = "Pacientes"
+                2 -> tab.text = "Análisis"
+                3 -> tab.text = "Perfil"
                 4 -> tab.text = "Chat"
             }
         }.attach()
 
         binding.layoutHome.setOnClickListener { selectPage(0, binding.layoutHome) }
-        binding.layoutAnalisis.setOnClickListener { selectPage(1, binding.layoutAnalisis) }
-        binding.layoutPaciente.setOnClickListener { selectPage(2, binding.layoutPaciente) }
-        binding.layoutImagenAi.setOnClickListener { selectPage(3, binding.layoutImagenAi) }
+        binding.layoutPaciente.setOnClickListener { selectPage(1, binding.layoutPaciente) }
+        binding.layoutAnalisis.setOnClickListener { selectPage(2, binding.layoutAnalisis) }
+        binding.layoutPerfil.setOnClickListener { selectPage(3, binding.layoutPerfil) }
         binding.layoutChat.setOnClickListener { selectPage(4, binding.layoutChat) }
     }
 
@@ -73,9 +73,9 @@ class HomeActivity : AppCompatActivity() {
         val animation = AnimationUtils.loadAnimation(this, R.anim.jump_up)
         val imageView: ImageView? = when (layout.id) {
             R.id.layout_home -> layout.findViewById(R.id.idhome)
-            R.id.layout_analisis -> layout.findViewById(R.id.idanalisis)
             R.id.layout_paciente -> layout.findViewById(R.id.idpaciente)
-            R.id.layout_imagen_ai -> layout.findViewById(R.id.idprocedimientoimagenes)
+            R.id.layout_analisis -> layout.findViewById(R.id.idanalisis)
+            R.id.layout_perfil -> layout.findViewById(R.id.idperfil)
             R.id.layout_chat -> layout.findViewById(R.id.idchat)
             else -> null
         }

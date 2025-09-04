@@ -17,53 +17,49 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="20dp"
-            android:text="Analizar Paciente"
+            android:text="Análisis de ECG"
             android:textColor="@color/black"
-            android:textSize="56sp"
+            android:textSize="32sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:paddingStart="30dp"
-            android:text="Enter Patient Data"
+            android:layout_marginBottom="16dp"
+            android:paddingStart="20dp"
+            android:text="Carga y analiza electrocardiogramas con IA"
             android:textColor="@color/gray"
-            android:textSize="20sp" />
+            android:textSize="16sp" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="100dp"
-            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_margin="16dp"
             android:background="@drawable/redondo_fondo"
-            >
-
+            android:gravity="center"
+            android:orientation="vertical">
 
             <EditText
                 android:id="@+id/etNombrePaciente"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="8dp"
-                android:layout_weight="1"
-                android:background="@drawable/sombra"
-                android:hint="Nombre del Paciente"
-                android:paddingStart="16dp"
-                android:textColor="@color/black"
-                android:textColorHint="@color/gray"
-                android:textSize="20sp" />
-
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/btnBuscarPaciente"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.3"
                 android:backgroundTint="#FF5858"
-                android:text="Buscar Paciente"
+                android:text="Seleccionar ECG"
                 android:textColor="@color/white" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Toca para seleccionar archivo ECG"
+                android:textColor="@color/gray" />
         </LinearLayout>
 
         <ScrollView

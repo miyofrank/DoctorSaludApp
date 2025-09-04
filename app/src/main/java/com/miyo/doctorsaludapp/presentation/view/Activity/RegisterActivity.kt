@@ -40,12 +40,18 @@ class RegisterActivity : AppCompatActivity() {
             val password = binding.passwordEditText.text.toString()
             val firstName = binding.firstNameEditText.text.toString()
             val lastName = binding.lastNameEditText.text.toString()
+            val specialization = binding.specializationEditText.text.toString()
+            val hospital = binding.hospitalEditText.text.toString()
+            val license = binding.licenseEditText.text.toString()
 
             val bundle = Bundle().apply {
                 putString("email", email)
                 putString("password", password)
                 putString("firstName", firstName)
                 putString("lastName", lastName)
+                putString("specialization", specialization)
+                putString("hospital", hospital)
+                putString("license", license)
             }
 
             val fragment = SpecializationFragment()
@@ -54,6 +60,10 @@ class RegisterActivity : AppCompatActivity() {
                 .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null)
                 .commit()
+        }
+
+        binding.loginLink.setOnClickListener {
+            finish()
         }
 
         authViewModel.user.observe(this, { user ->

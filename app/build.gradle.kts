@@ -8,11 +8,11 @@ plugins {
 
 android {
     namespace = "com.miyo.doctorsaludapp"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.miyo.doctorsaludapp"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -45,8 +45,8 @@ android {
     dataBinding {
         enable = true
     }
-    buildToolsVersion = "34.0.0"
-    ndkVersion = "27.0.11718014 rc1"
+    buildToolsVersion = "35.0.0"
+    ndkVersion = "29.0.13113456 rc1"
 }
 
 dependencies {

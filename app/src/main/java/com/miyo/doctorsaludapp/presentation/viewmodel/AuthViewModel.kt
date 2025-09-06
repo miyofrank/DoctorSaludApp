@@ -36,10 +36,10 @@ class AuthViewModel(
         }
     }
 
-    fun register(email: String, password: String, firstName: String, lastName: String, specialization: String, experienceYears: Int) {
+    fun register(email: String, password: String, firstName: String, lastName: String, specialization: String, hospital: String, licencia: String) {
         viewModelScope.launch {
             try {
-                registerUseCase.execute(email, password, firstName, lastName, specialization, experienceYears)
+                registerUseCase.execute(email, password, firstName, lastName, specialization,hospital, licencia )
                 _user.value = auth.currentUser
             } catch (e: Exception) {
                 _error.value = e.message

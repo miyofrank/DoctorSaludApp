@@ -171,7 +171,7 @@
                     android:visibility="gone" />
 
                 <EditText
-                    android:id="@+id/etDate"
+                    android:id="@+id/etDate1"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:visibility="gone" />
@@ -358,7 +358,7 @@
                     android:layout_marginTop="8dp"
                     android:background="@drawable/login_input_background"
                     android:scaleType="center"
-                    android:src="@drawable/ic_menu_gallery" />
+                    android:src="@drawable/background_card" />
 
                 <TextView
                     android:layout_width="wrap_content"

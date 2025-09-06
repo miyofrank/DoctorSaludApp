@@ -104,4 +104,20 @@
     <color name="mediumorchid">#ffba55d3</color>
     <color name="mediumpurple">#ff9370db</color>
     <color name="mediumseagreen">#ff3cb371</color>
+
+    <color name="black_60">#99000000</color>
+
+    <color name="primaryBlue">#356DE4</color>
+
+    <color name="green_50">#EAF6EF</color>
+    <color name="green_700">#159A43</color>
+
+    <color name="chip_orange_bg">#FFF3E0</color>
+    <color name="chip_orange_border">#FFE0B2</color>
+    <color name="chip_orange_text">#E65100</color>
+
+    <color name="chip_green_bg">#E8F5E9</color>
+    <color name="chip_green_border">#C8E6C9</color>
+    <color name="chip_green_text">#1B5E20</color>
+
 </resources>

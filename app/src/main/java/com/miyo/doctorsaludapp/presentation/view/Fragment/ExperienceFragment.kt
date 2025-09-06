@@ -31,10 +31,6 @@ class ExperienceFragment : Fragment() {
 
         binding.finishButton.setOnClickListener {
             val experienceYears = binding.experienceEditText.text.toString().toInt()
-
-            if (email != null && password != null && firstName != null && lastName != null && specialization != null) {
-                authViewModel.register(email, password, firstName, lastName, specialization, experienceYears)
-            }
         }
 
         authViewModel.user.observe(viewLifecycleOwner, { user ->

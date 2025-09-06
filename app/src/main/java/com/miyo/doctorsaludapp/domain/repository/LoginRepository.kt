@@ -11,6 +11,7 @@ interface LoginRepository {
         firstName: String,
         lastName: String,
         specialization: String,
-        experienceYears: Int
+        hospital: String,
+        licencia: String
     ): FirebaseUser?
 }

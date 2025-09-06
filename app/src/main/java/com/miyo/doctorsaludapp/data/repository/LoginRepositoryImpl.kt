@@ -16,7 +16,7 @@ class LoginRepositoryImpl(private val firebaseService: FirebaseService) : LoginR
         return userDTO.toDomain()
     }
 
-    override suspend fun register(email: String, password: String, firstName: String, lastName: String, specialization: String, experienceYears: Int): FirebaseUser? {
-        return firebaseService.register(email, password, firstName, lastName, specialization, experienceYears)
+    override suspend fun register(email: String, password: String, firstName: String, lastName: String, specialization: String, hospital: String ,licencia: String): FirebaseUser? {
+        return firebaseService.register(email, password, firstName, lastName, specialization, hospital, licencia)
     }
 }

@@ -53,13 +53,8 @@ class RegisterActivity : AppCompatActivity() {
                 putString("hospital", hospital)
                 putString("license", license)
             }
+            authViewModel.register(email, password, firstName, lastName, specialization, hospital, license)
 
-            val fragment = SpecializationFragment()
-            fragment.arguments = bundle
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null)
-                .commit()
         }
 
         binding.loginLink.setOnClickListener {

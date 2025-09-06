@@ -18,7 +18,7 @@ class FirebaseService {
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-    suspend fun register(email: String, password: String, firstName: String, lastName: String, specialization: String, experienceYears: Int): FirebaseUser? {
+    suspend fun register(email: String, password: String, firstName: String, lastName: String, especializacion: String, hospital: String, licencia: String): FirebaseUser? {
         return try {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             result.user?.let { user ->
@@ -28,8 +28,9 @@ class FirebaseService {
                     "email" to email,
                     "firstName" to firstName,
                     "lastName" to lastName,
-                    "specialization" to specialization,
-                    "experienceYears" to experienceYears
+                    "especializacion" to especializacion,
+                    "hospital" to hospital,
+                    "licencia" to licencia
                 )
                 firestore.collection("users").document(user.uid).set(userMap).await()
             }

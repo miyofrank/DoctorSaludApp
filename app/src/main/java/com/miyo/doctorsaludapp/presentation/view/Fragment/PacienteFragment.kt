@@ -12,10 +12,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.firestore.FirebaseFirestore
 import com.miyo.doctorsaludapp.R
-import com.miyo.doctorsaludapp.databinding.FragmentPacienteBinding
 import com.miyo.doctorsaludapp.data.repository.FirestorePatientRepository
+import com.miyo.doctorsaludapp.databinding.FragmentPacienteBinding
 import com.miyo.doctorsaludapp.domain.model.Patient
 import com.miyo.doctorsaludapp.domain.usecase.patient.GetPatientsUseCase
+import com.miyo.doctorsaludapp.presentation.view.Activity.RegisterPatientActivity
 import com.miyo.doctorsaludapp.presentation.view.Adapter.PacienteAdapter
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -31,7 +32,11 @@ class PacienteFragment : Fragment() {
 
     private val all = mutableListOf<Patient>()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentPacienteBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -39,17 +44,17 @@ class PacienteFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Repo + UseCase (si usas Hilt, inyéctalo)
+        // Repo + UseCase
         val repo = FirestorePatientRepository(FirebaseFirestore.getInstance(), "pacientes")
         getPatientsUseCase = GetPatientsUseCase(repo)
 
         adapter = PacienteAdapter(
             onVerDetalles = { p ->
-                // ⇢ Conecta tu Activity de Detalle:
+                // TODO: enlaza tu Activity de detalle si ya la tienes
                 // startActivity(Intent(requireContext(), PatientDetailActivity::class.java).putExtra("patient_id", p.id))
             },
             onVerEcg = { p ->
-                // ⇢ Conecta tu Activity de ECG:
+                // TODO: enlaza tu Activity de ECG si ya la tienes
                 // startActivity(Intent(requireContext(), EcgDetailActivity::class.java).putExtra("patient_id", p.id).putExtra("ecg_id", p.ecgId))
             }
         )
@@ -64,14 +69,18 @@ class PacienteFragment : Fragment() {
         val estados = resources.getStringArray(R.array.filtro_estados)
         val riesgos = resources.getStringArray(R.array.filtro_riesgos)
 
-        binding.etEstado.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, estados))
-        binding.etRiesgo.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, riesgos))
+        binding.etEstado.setAdapter(
+            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, estados)
+        )
+        binding.etRiesgo.setAdapter(
+            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, riesgos)
+        )
 
         binding.etEstado.setOnItemClickListener { _, _, _, _ -> applyFilters() }
         binding.etRiesgo.setOnItemClickListener { _, _, _, _ -> applyFilters() }
 
         binding.etBuscar.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) { applyFilters() }
+            override fun afterTextChanged(s: Editable?) = applyFilters()
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
@@ -79,9 +88,10 @@ class PacienteFragment : Fragment() {
 
     private fun setupActions() {
         binding.swipeRefresh.setOnRefreshListener { applyFilters() }
+
+        // 👉 FAB: abrir pantalla de registro de paciente
         binding.fabAddPaciente.setOnClickListener {
-            // ⇢ Conecta tu flujo de "Agregar paciente":
-            // startActivity(Intent(requireContext(), AddPatientActivity::class.java))
+            startActivity(Intent(requireContext(), RegisterPatientActivity::class.java))
         }
     }
 
@@ -97,14 +107,19 @@ class PacienteFragment : Fragment() {
     }
 
     private fun applyFilters() {
-        val q = binding.etBuscar.text?.toString()?.trim().orEmpty().lowercase(Locale.getDefault())
+        val q = binding.etBuscar.text?.toString()?.trim().orEmpty()
+            .lowercase(Locale.getDefault())
         val fEstado = binding.etEstado.text?.toString()?.trim().orEmpty()
         val fRiesgo = binding.etRiesgo.text?.toString()?.trim().orEmpty()
 
         val result = all.filter { p ->
+            val nombre = when {
+                !p.nombreCompleto.isNullOrBlank() -> p.nombreCompleto!!
+                else -> listOfNotNull(p.nombres, p.apellidos).joinToString(" ").trim()
+            }.lowercase(Locale.getDefault())
+
             val byText = if (q.isEmpty()) true else
-                (p.nombreCompleto ?: p.nombre ?: "").lowercase().contains(q) ||
-                        (p.dni ?: "").lowercase().contains(q)
+                nombre.contains(q) || (p.dni ?: "").lowercase(Locale.getDefault()).contains(q)
 
             val byEstado = when (fEstado) {
                 "", "Todos los estados" -> true
@@ -151,3 +166,4 @@ class PacienteFragment : Fragment() {
         _binding = null
     }
 }
+

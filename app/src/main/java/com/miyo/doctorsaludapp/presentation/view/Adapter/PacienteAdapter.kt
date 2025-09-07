@@ -4,10 +4,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.miyo.doctorsaludapp.R
-// ⬇️ USA TU MODELO REAL
 import com.miyo.doctorsaludapp.domain.model.Patient
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -55,63 +55,71 @@ class PacienteAdapter(
             onVerDetalles: (Patient) -> Unit,
             onVerEcg: (Patient) -> Unit
         ) {
-            // Ajusta los nombres a tu modelo real si cambia alguno
-            tvNombre.text = p.nombreCompleto ?: p.nombre ?: ""
-            tvDni.text = "DNI: ${p.dni ?: ""}"
+            // Nombre
+            val nombre = when {
+                !p.nombreCompleto.isNullOrBlank() -> p.nombreCompleto!!
+                else -> listOfNotNull(p.nombres, p.apellidos).joinToString(" ").trim()
+            }
+            tvNombre.text = nombre
+
+            // Otros campos
+            tvDni.text = "DNI: ${p.dni.orEmpty()}"
             tvEdad.text = p.edad?.let { "Edad: $it años" } ?: "Edad: "
-            tvSexo.text = "Sexo: ${p.sexo ?: ""}"
-            tvCirugia.text = "Cirugía: ${p.cirugia ?: ""}"
+            tvSexo.text = "Sexo: ${p.sexo.orEmpty()}"
+            tvCirugia.text = "Cirugía: ${p.tipoCirugia.orEmpty()}"
             tvFecha.text = "Fecha: ${p.fechaCirugia?.let { df.format(it) } ?: ""}"
 
-            // Chip estado (semáforo)
             val ctx = itemView.context
-            val estado = (p.estado ?: "").lowercase(Locale.getDefault())
+
+            // Chip ESTADO (semáforo)
+            val estadoKey = (p.estado ?: "").lowercase(Locale.getDefault())
             when {
-                estado.contains("apto") || estado.contains("aproba") -> {
-                    chipEstado.text = if (estado.contains("aproba")) "Aprobado" else "Apto"
+                estadoKey.contains("apto") || estadoKey.contains("aproba") -> {
+                    chipEstado.text = if (estadoKey.contains("aproba")) "Aprobado" else "Apto"
                     chipEstado.setBackgroundResource(R.drawable.bg_chip_green)
-                    chipEstado.setTextColor(ctx.getColor(R.color.chip_green_text))
+                    chipEstado.setTextColor(ContextCompat.getColor(ctx, R.color.chip_green_text))
                 }
-                estado.contains("evalu") -> {
+                estadoKey.contains("evalu") -> {
                     chipEstado.text = "En evaluación"
                     chipEstado.setBackgroundResource(R.drawable.bg_chip_orange)
-                    chipEstado.setTextColor(ctx.getColor(R.color.chip_orange_text))
+                    chipEstado.setTextColor(ContextCompat.getColor(ctx, R.color.chip_orange_text))
                 }
-                estado.contains("rech") || estado.contains("no apto") -> {
+                estadoKey.contains("rech") || estadoKey.contains("no apto") -> {
                     chipEstado.text = "No apto"
                     chipEstado.setBackgroundResource(R.drawable.bg_chip_red)
-                    chipEstado.setTextColor(ctx.getColor(R.color.white))
+                    chipEstado.setTextColor(ContextCompat.getColor(ctx, R.color.white))
                 }
                 else -> {
-                    chipEstado.text = p.estado?.ifEmpty { "-" } ?: "-"
+                    chipEstado.text = p.estado?.takeIf { it.isNotBlank() } ?: "-"
                     chipEstado.setBackgroundResource(R.drawable.bg_chip_orange)
-                    chipEstado.setTextColor(ctx.getColor(R.color.chip_orange_text))
+                    chipEstado.setTextColor(ContextCompat.getColor(ctx, R.color.chip_orange_text))
                 }
             }
 
-            // Chip riesgo (semáforo)
-            val riesgo = (p.riesgo ?: "").lowercase(Locale.getDefault())
+            // Chip RIESGO (semáforo)
+            val riesgoKey = (p.riesgo ?: "").lowercase(Locale.getDefault())
             val pct = p.riesgoPct?.let { " ($it%)" } ?: ""
             when {
-                riesgo.contains("alto") -> {
+                riesgoKey.contains("alto") -> {
                     chipRiesgo.text = "Alto$pct"
                     chipRiesgo.setBackgroundResource(R.drawable.bg_chip_red)
-                    chipRiesgo.setTextColor(ctx.getColor(R.color.white))
+                    chipRiesgo.setTextColor(ContextCompat.getColor(ctx, R.color.white))
                 }
-                riesgo.contains("moder") -> {
+                riesgoKey.contains("moder") -> {
                     chipRiesgo.text = "Moderado$pct"
                     chipRiesgo.setBackgroundResource(R.drawable.bg_chip_orange)
-                    chipRiesgo.setTextColor(ctx.getColor(R.color.chip_orange_text))
+                    chipRiesgo.setTextColor(ContextCompat.getColor(ctx, R.color.chip_orange_text))
                 }
-                riesgo.contains("bajo") -> {
+                riesgoKey.contains("bajo") -> {
                     chipRiesgo.text = "Bajo$pct"
                     chipRiesgo.setBackgroundResource(R.drawable.bg_chip_green)
-                    chipRiesgo.setTextColor(ctx.getColor(R.color.chip_green_text))
+                    chipRiesgo.setTextColor(ContextCompat.getColor(ctx, R.color.chip_green_text))
                 }
                 else -> {
-                    chipRiesgo.text = p.riesgo?.takeIf { it.isNotBlank() }?.plus(pct) ?: "-"
+                    val label = p.riesgo?.takeIf { it.isNotBlank() }?.let { it + pct } ?: "-"
+                    chipRiesgo.text = label
                     chipRiesgo.setBackgroundResource(R.drawable.bg_chip_orange)
-                    chipRiesgo.setTextColor(ctx.getColor(R.color.chip_orange_text))
+                    chipRiesgo.setTextColor(ContextCompat.getColor(ctx, R.color.chip_orange_text))
                 }
             }
 

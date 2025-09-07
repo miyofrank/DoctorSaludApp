@@ -62,5 +62,28 @@
         <item>Moderado</item>
         <item>Alto</item>
     </string-array>
+    <string-array name="sexo_options">
+        <item>Femenino</item>
+        <item>Masculino</item>
+        <item>Otro</item>
+    </string-array>
+
+    <string-array name="grupo_sanguineo_options">
+        <item>A+</item><item>A-</item><item>B+</item><item>B-</item>
+        <item>AB+</item><item>AB-</item><item>O+</item><item>O-</item>
+    </string-array>
+
+    <string-array name="anestesia_options">
+        <item>General</item>
+        <item>Regional</item>
+        <item>Local</item>
+        <item>Sedación</item>
+    </string-array>
+
+    <string-array name="urgencia_options">
+        <item>Electiva</item>
+        <item>Urgente</item>
+        <item>Emergencia</item>
+    </string-array>
 
 </resources>

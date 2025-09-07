@@ -6,65 +6,62 @@ import java.util.Date
 
 @Keep
 data class Patient(
-
-    // Identificador de documento en Firestore
+    // Meta
     var id: String? = null,
+    var createdAt: Date? = null,
+    var updatedAt: Date? = null,
 
     // Identidad
-    var nombreCompleto: String? = null,  // preferido
-    var nombre: String? = null,          // opcional si usas nombre+apellidos por separado
     var dni: String? = null,
+    var nombres: String? = null,
+    var apellidos: String? = null,
+    var nombreCompleto: String? = null,
     var edad: Int? = null,
     var sexo: String? = null,
-
-    // Signos básicos opcionales
+    var grupoSanguineo: String? = null,
     var alturaCm: Int? = null,
     var pesoKg: Int? = null,
 
-    // Cirugía programada
-    var cirugia: String? = null,
-    var fechaCirugia: Date? = null,
-    var cirujano: String? = null,
-    var duracionEstimadaMin: Int? = null,
-
-    // Estado/Riesgo (semáforo)
-    var estado: String? = null,          // "En evaluación" | "Apto" | "No apto" | etc.
-    var riesgo: String? = null,          // "Bajo" | "Moderado" | "Alto"
-    var riesgoPct: Int? = null,          // porcentaje de riesgo si aplica
-
-    // ECG
-    var ecgId: String? = null,           // id o referencia al estudio ECG
-
-    // Antecedentes / Medicación (opcional)
-    var antecedentes: List<String>? = null,
+    // Antecedentes
+    var alergias: List<String>? = null,
     var medicamentosActuales: List<String>? = null,
+    var enfermedadesCronicas: List<String>? = null,
+    var cirugiasPrevias: List<String>? = null,
+    var antecedentesFamiliares: List<String>? = null,
 
-    // Metadatos
-    var createdAt: Date? = null,
-    var updatedAt: Date? = null
+    // Cirugía programada
+    var tipoCirugia: String? = null,
+    var fechaCirugia: Date? = null,
+    var duracionEstimadaMin: Int? = null,
+    var tipoAnestesia: String? = null,
+    var urgencia: String? = null,
+    var cirujano: String? = null,
 
+    // ECG (subido a Storage)
+    var ecgUrl: String? = null,      // download URL
+    var ecgId: String? = null,       // nombre archivo o id
+    var ecgMime: String? = null,
+
+    // Exámenes complementarios (Storage)
+    var examenesTexto: String? = null,
+    var examenesArchivos: List<String>? = null, // download URLs
+
+    // Notas y evaluación
+    var notas: String? = null,
+    var estado: String? = null,
+    var riesgo: String? = null,
+    var riesgoPct: Int? = null
 ) : Serializable {
-    // Constructor sin argumentos requerido por Firestore
     constructor() : this(
-        id = null,
-        nombreCompleto = null,
-        nombre = null,
-        dni = null,
-        edad = null,
-        sexo = null,
-        alturaCm = null,
-        pesoKg = null,
-        cirugia = null,
-        fechaCirugia = null,
-        cirujano = null,
-        duracionEstimadaMin = null,
-        estado = null,
-        riesgo = null,
-        riesgoPct = null,
-        ecgId = null,
-        antecedentes = null,
-        medicamentosActuales = null,
-        createdAt = null,
-        updatedAt = null
+        id = null, createdAt = null, updatedAt = null,
+        dni = null, nombres = null, apellidos = null, nombreCompleto = null, edad = null,
+        sexo = null, grupoSanguineo = null, alturaCm = null, pesoKg = null,
+        alergias = null, medicamentosActuales = null, enfermedadesCronicas = null,
+        cirugiasPrevias = null, antecedentesFamiliares = null,
+        tipoCirugia = null, fechaCirugia = null, duracionEstimadaMin = null,
+        tipoAnestesia = null, urgencia = null, cirujano = null,
+        ecgUrl = null, ecgId = null, ecgMime = null,
+        examenesTexto = null, examenesArchivos = null,
+        notas = null, estado = null, riesgo = null, riesgoPct = null
     )
 }

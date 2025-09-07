@@ -7,6 +7,7 @@ interface PatientRepository {
     fun getPatientsStream(): Flow<List<Patient>>
     suspend fun getPatientById(id: String): Patient?
     suspend fun addPatient(patient: Patient): String
+    suspend fun setPatient(id: String, patient: Patient)   // nuevo: crear/actualizar por ID conocido
     suspend fun updatePatient(patient: Patient)
     suspend fun deletePatient(id: String)
 }

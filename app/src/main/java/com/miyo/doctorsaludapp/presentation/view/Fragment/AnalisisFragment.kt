@@ -51,14 +51,6 @@ class AnalisisFragment : Fragment() {
     }
     private var autoAnalisisEnabled = false
 
-    private fun loadAutoPref() {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val userRepo = FirestoreUserRepository(FirebaseFirestore.getInstance(), "usuarios")
-        viewLifecycleOwner.lifecycleScope.launch {
-            autoAnalisisEnabled = (userRepo.getById(uid)?.autoAnalisis == true)
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

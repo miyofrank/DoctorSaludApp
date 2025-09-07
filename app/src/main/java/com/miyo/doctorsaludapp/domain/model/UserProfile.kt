@@ -10,5 +10,6 @@ data class UserProfile(
     var colegiatura: String? = null,    // CMP
     var telefono: String? = null,
     var autoAnalisis: Boolean? = false, // preferencia
+    var createdAt: Long? = null,
     var updatedAt: Long? = null
 )

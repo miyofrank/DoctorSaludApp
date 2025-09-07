@@ -23,7 +23,7 @@ class PerfilFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val auth by lazy { FirebaseAuth.getInstance() }
-    private val repo by lazy { FirestoreUserRepository(FirebaseFirestore.getInstance(), "usuarios") }
+    private val repo by lazy { FirestoreUserRepository(FirebaseFirestore.getInstance()) }
     private val getUse by lazy { GetUserProfileUseCase(repo) }
     private val setUse by lazy { UpdateUserProfileUseCase(repo) }
     private val setAutoUse by lazy { UpdateAutoAnalysisPrefUseCase(repo) }
@@ -43,18 +43,14 @@ class PerfilFragment : Fragment() {
     }
 
     private fun setupUi() = with(binding) {
-        btnEdit.setOnClickListener {
-            if (!editMode) enterEdit() else saveProfile()
-        }
+        btnEdit.setOnClickListener { if (!editMode) enterEdit() else saveProfile() }
         btnCancelar.setOnClickListener { leaveEdit(discard = true) }
         btnGuardar.setOnClickListener { saveProfile() }
-
         switchAuto.setOnCheckedChangeListener { _, isChecked ->
             val uid = auth.currentUser?.uid ?: return@setOnCheckedChangeListener
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
                     setAutoUse(uid, isChecked)
-                    Toast.makeText(requireContext(), "Preferencia actualizada", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
                     Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
@@ -70,10 +66,8 @@ class PerfilFragment : Fragment() {
         }
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val prof = getUse(uid) ?: UserProfile(
-                    id = uid,
-                    email = auth.currentUser?.email
-                )
+                // Lee de `usuarios`; si no existe, intenta fallbacks y migra
+                val prof = getUse(uid) ?: UserProfile(id = uid, email = auth.currentUser?.email)
                 original = prof
                 bind(prof)
             } catch (e: Exception) {
@@ -102,8 +96,7 @@ class PerfilFragment : Fragment() {
         binding.btnEdit.text = "Guardar"
         binding.actionsEdit.visibility = View.VISIBLE
         disableInputs(false)
-        // correo no editable
-        binding.etEmail.isEnabled = false
+        binding.etEmail.isEnabled = false // email solo lectura
     }
 
     private fun leaveEdit(discard: Boolean) {
@@ -120,24 +113,20 @@ class PerfilFragment : Fragment() {
         etHospital.isEnabled = !disable
         etColegiatura.isEnabled = !disable
         etTelefono.isEnabled = !disable
-        // etEmail queda siempre deshabilitado (solo lectura)
+        // etEmail queda deshabilitado
     }
 
     private fun saveProfile() {
-        val uid = auth.currentUser?.uid
-        if (uid.isNullOrEmpty()) return
-
+        val uid = auth.currentUser?.uid ?: return
         val updated = (original ?: UserProfile(id = uid, email = auth.currentUser?.email)).copy(
             nombres = binding.etNombres.text?.toString()?.trim(),
             apellidos = binding.etApellidos.text?.toString()?.trim(),
-            // email no editable
             especialidad = binding.etEspecialidad.text?.toString()?.trim(),
             hospital = binding.etHospital.text?.toString()?.trim(),
             colegiatura = binding.etColegiatura.text?.toString()?.trim(),
             telefono = binding.etTelefono.text?.toString()?.trim(),
             autoAnalisis = binding.switchAuto.isChecked
         )
-
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 setUse(uid, updated)

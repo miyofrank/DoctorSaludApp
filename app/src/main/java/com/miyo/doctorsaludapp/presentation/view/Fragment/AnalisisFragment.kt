@@ -11,11 +11,13 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.miyo.doctorsaludapp.R
 import com.miyo.doctorsaludapp.data.repository.FirebaseStorageRepository
 import com.miyo.doctorsaludapp.data.repository.FirestorePatientRepository
+import com.miyo.doctorsaludapp.data.repository.FirestoreUserRepository
 import com.miyo.doctorsaludapp.databinding.FragmentAnalisisBinding
 import com.miyo.doctorsaludapp.domain.model.Patient
 import com.miyo.doctorsaludapp.domain.usecase.patient.GetPatientsUseCase
@@ -46,6 +48,15 @@ class AnalisisFragment : Fragment() {
     private val pickEcg = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri ?: return@registerForActivityResult
         uploadEcg(uri)
+    }
+    private var autoAnalisisEnabled = false
+
+    private fun loadAutoPref() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userRepo = FirestoreUserRepository(FirebaseFirestore.getInstance(), "usuarios")
+        viewLifecycleOwner.lifecycleScope.launch {
+            autoAnalisisEnabled = (userRepo.getById(uid)?.autoAnalisis == true)
+        }
     }
 
     override fun onCreateView(
@@ -139,6 +150,7 @@ class AnalisisFragment : Fragment() {
                 selected = updated
                 showSelected()
                 Toast.makeText(requireContext(), "ECG cargado", Toast.LENGTH_SHORT).show()
+                if (autoAnalisisEnabled) runMockAnalysis()
             } catch (e: Exception) {
                 Toast.makeText(
                     requireContext(),
@@ -201,6 +213,7 @@ class AnalisisFragment : Fragment() {
                         "Resultados guardados (mock)",
                         Toast.LENGTH_SHORT
                     ).show()
+                    if (autoAnalisisEnabled) runMockAnalysis()
                 } catch (e: Exception) {
                     Toast.makeText(
                         requireContext(),
@@ -216,6 +229,10 @@ class AnalisisFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+
+
+
 }
 
 

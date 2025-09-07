@@ -18,6 +18,12 @@
         android:theme="@style/Theme.DoctorSaludApp"
         tools:targetApi="31">
         <activity
+            android:name=".presentation.view.Activity.EcgDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".presentation.view.Activity.PatientDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".presentation.view.Activity.RegisterPatientActivity"
             android:exported="false" />
         <activity

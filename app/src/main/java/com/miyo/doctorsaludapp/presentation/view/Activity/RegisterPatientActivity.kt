@@ -34,6 +34,8 @@ class RegisterPatientActivity : AppCompatActivity() {
     private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     // Repos
+    private var patientId: String? = null
+    private var existing: Patient? = null
     private val firestore by lazy { FirebaseFirestore.getInstance() }
     private val storage by lazy { FirebaseStorage.getInstance() }
     private val patientRepo by lazy { FirestorePatientRepository(firestore, "pacientes") }
@@ -44,12 +46,55 @@ class RegisterPatientActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterPatientBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        patientId = intent.getStringExtra("patient_id")
+        if (!patientId.isNullOrEmpty()) {
+            title = "Editar paciente"
+            loadPatientForEdit(patientId!!)
+        } else {
+            title = "Registrar paciente"
+        }
         setupDropdowns()
         setupPickers()
         setupActions()
     }
+    private fun loadPatientForEdit(id: String) {
+        lifecycleScope.launch {
+            try {
+                val repo = FirestorePatientRepository(FirebaseFirestore.getInstance(), "pacientes")
+                val getById = com.miyo.doctorsaludapp.domain.usecase.patient.GetPatientByIdUseCase(repo)
+                val p = getById(id) ?: return@launch
+                existing = p
+                // Prellenar
+                binding.etDni.setText(p.dni)
+                binding.etNombres.setText(p.nombres)
+                binding.etApellidos.setText(p.apellidos)
+                binding.etEdad.setText(p.edad?.toString() ?: "")
+                binding.ddSexo.setText(p.sexo ?: "", false)
+                binding.ddGrupo.setText(p.grupoSanguineo ?: "", false)
+                binding.etAltura.setText(p.alturaCm?.toString() ?: "")
+                binding.etPeso.setText(p.pesoKg?.toString() ?: "")
 
+                binding.etAlergias.setText(p.alergias?.joinToString(", ") ?: "")
+                binding.etMedicamentos.setText(p.medicamentosActuales?.joinToString(", ") ?: "")
+                binding.etCronicas.setText(p.enfermedadesCronicas?.joinToString(", ") ?: "")
+                binding.etCirugiasPrevias.setText(p.cirugiasPrevias?.joinToString(", ") ?: "")
+                binding.etAntecedentesFam.setText(p.antecedentesFamiliares?.joinToString(", ") ?: "")
+
+                binding.etTipoCirugia.setText(p.tipoCirugia ?: "")
+                binding.etDuracion.setText(p.duracionEstimadaMin?.toString() ?: "")
+                binding.ddAnestesia.setText(p.tipoAnestesia ?: "", false)
+                binding.ddUrgencia.setText(p.urgencia ?: "", false)
+                binding.etCirujano.setText(p.cirujano ?: "")
+                p.fechaCirugia?.let { binding.etFecha.setText(java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(it)); binding.etFecha.tag = it }
+
+                binding.etExamenesTexto.setText(p.examenesTexto ?: "")
+                binding.tvEcgFile.text = if (p.ecgUrl.isNullOrEmpty()) "Sin archivo seleccionado" else "ECG cargado"
+                binding.tvExamenesFiles.text = if (p.examenesArchivos.isNullOrEmpty()) "Sin archivos" else "${p.examenesArchivos!!.size} archivo(s)"
+            } catch (e: Exception) {
+                Toast.makeText(this@RegisterPatientActivity, "Error al cargar: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
     private fun setupDropdowns() {
         binding.ddSexo.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, resources.getStringArray(R.array.sexo_options)))
         binding.ddGrupo.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, resources.getStringArray(R.array.grupo_sanguineo_options)))

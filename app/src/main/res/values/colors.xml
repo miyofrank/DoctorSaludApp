@@ -120,4 +120,9 @@
     <color name="chip_green_border">#C8E6C9</color>
     <color name="chip_green_text">#1B5E20</color>
 
+    <color name="chip_red_bg">#FFEBEE</color>
+    <color name="chip_red_border">#FFCDD2</color>
+    <color name="chip_red_text">#B71C1C</color>
+
+
 </resources>

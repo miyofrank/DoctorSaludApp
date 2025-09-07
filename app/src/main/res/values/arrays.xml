@@ -48,4 +48,19 @@
         <item>O-</item>
     </string-array>
 
+    <string-array name="filtro_estados">
+        <item>Todos los estados</item>
+        <item>En evaluación</item>
+        <item>Apto</item>
+        <item>Aprobado</item>
+        <item>No apto</item>
+    </string-array>
+
+    <string-array name="filtro_riesgos">
+        <item>Todos los riesgos</item>
+        <item>Bajo</item>
+        <item>Moderado</item>
+        <item>Alto</item>
+    </string-array>
+
 </resources>

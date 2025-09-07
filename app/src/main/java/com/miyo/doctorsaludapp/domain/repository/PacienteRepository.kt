@@ -1,9 +1,12 @@
 package com.miyo.doctorsaludapp.domain.repository
-import com.miyo.doctorsaludapp.domain.model.Paciente
 
-interface PacienteRepository {
-    suspend fun listarPacientes(): List<Paciente>
-    suspend fun registrarPaciente(paciente: Paciente)
-    suspend fun editarPaciente(paciente: Paciente)
-    suspend fun eliminarPaciente(paciente: Paciente)
+import com.miyo.doctorsaludapp.domain.model.Patient
+import kotlinx.coroutines.flow.Flow
+
+interface PatientRepository {
+    fun getPatientsStream(): Flow<List<Patient>>
+    suspend fun getPatientById(id: String): Patient?
+    suspend fun addPatient(patient: Patient): String
+    suspend fun updatePatient(patient: Patient)
+    suspend fun deletePatient(id: String)
 }

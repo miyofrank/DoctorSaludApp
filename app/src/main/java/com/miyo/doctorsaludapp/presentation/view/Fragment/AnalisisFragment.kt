@@ -1,216 +1,223 @@
 package com.miyo.doctorsaludapp.presentation.view.Fragment
-import android.R.layout
+
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.miyo.doctorsaludapp.R
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import com.miyo.doctorsaludapp.data.repository.FirebaseStorageRepository
+import com.miyo.doctorsaludapp.data.repository.FirestorePatientRepository
 import com.miyo.doctorsaludapp.databinding.FragmentAnalisisBinding
-import com.miyo.doctorsaludapp.domain.model.Paciente
-import com.miyo.doctorsaludapp.domain.usecase.PacienteUseCase
-import com.miyo.doctorsaludapp.presentation.view.Activity.RecomendacionesActivity
-import com.miyo.doctorsaludapp.presentation.viewmodel.AnalisisViewModel
-
+import com.miyo.doctorsaludapp.domain.model.Patient
+import com.miyo.doctorsaludapp.domain.usecase.patient.GetPatientsUseCase
+import com.miyo.doctorsaludapp.domain.usecase.patient.SetPatientUseCase
+import com.miyo.doctorsaludapp.presentation.view.Activity.PatientDetailActivity
+import com.miyo.doctorsaludapp.presentation.view.Activity.RegisterPatientActivity
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import java.util.Locale
+import kotlin.random.Random
 
 class AnalisisFragment : Fragment() {
 
-    private lateinit var binding: FragmentAnalisisBinding
-    private lateinit var viewModel: AnalisisViewModel
+    private var _binding: FragmentAnalisisBinding? = null
+    private val binding get() = _binding!!
+
+    private val firestore by lazy { FirebaseFirestore.getInstance() }
+    private val storage by lazy { FirebaseStorage.getInstance() }
+
+    private val repo by lazy { FirestorePatientRepository(firestore, "pacientes") }
+    private val getPatientsUseCase by lazy { GetPatientsUseCase(repo) }
+    private val setPatientUseCase by lazy { SetPatientUseCase(repo) }
+    private val storageRepo by lazy { FirebaseStorageRepository(storage, requireContext().contentResolver) }
+
+    private val pacientes = mutableListOf<Patient>()
+    private var selected: Patient? = null
+
+    private val pickEcg = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri ?: return@registerForActivityResult
+        uploadEcg(uri)
+    }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        binding = FragmentAnalisisBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(this).get(AnalisisViewModel::class.java)
-
-        setupUI()
-        setupObservers()
-
+    ): View {
+        _binding = FragmentAnalisisBinding.inflate(inflater, container, false)
         return binding.root
     }
 
-    private fun setupUI() {
-        // Setup Spinners
-        val dolorPechoAdapter = ArrayAdapter.createFromResource(
-            requireContext(),
-            R.array.dolor_pecho_array,
-            android.R.layout.simple_spinner_item
-        )
-        dolorPechoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerDolorPecho.adapter = dolorPechoAdapter
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        observePatients()
+        setupUi()
+    }
 
-        val azucarEnSangreAdapter = ArrayAdapter.createFromResource(
-            requireContext(),
-            R.array.azucar_en_sangre_array,
-            android.R.layout.simple_spinner_item
-        )
-        azucarEnSangreAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerAzucarEnSangre.adapter = azucarEnSangreAdapter
-
-        val restEcgAdapter = ArrayAdapter.createFromResource(
-            requireContext(),
-            R.array.rest_ecg_array,
-            android.R.layout.simple_spinner_item
-        )
-        restEcgAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerRestEcg.adapter = restEcgAdapter
-
-        val anginaEjercicioAdapter = ArrayAdapter.createFromResource(
-            requireContext(),
-            R.array.angina_ejercicio_array,
-            android.R.layout.simple_spinner_item
-        )
-        anginaEjercicioAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerAnginaEjercicio.adapter = anginaEjercicioAdapter
-
-        val pendienteAdapter = ArrayAdapter.createFromResource(
-            requireContext(),
-            R.array.pendiente_array,
-            android.R.layout.simple_spinner_item
-        )
-        pendienteAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerPendiente.adapter = pendienteAdapter
-
-        val vasosColoreadosAdapter = ArrayAdapter.createFromResource(
-            requireContext(),
-            R.array.vasos_coloreados_array,
-            android.R.layout.simple_spinner_item
-        )
-        vasosColoreadosAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerVasosColoreados.adapter = vasosColoreadosAdapter
-
-        val talasemiaAdapter = ArrayAdapter.createFromResource(
-            requireContext(),
-            R.array.talasemia_array,
-            android.R.layout.simple_spinner_item
-        )
-        talasemiaAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerTalasemia.adapter = talasemiaAdapter
-
-        binding.btnBuscarPaciente.setOnClickListener {
-            val nombrePaciente = binding.etNombrePaciente.text.toString()
-            buscarPaciente(nombrePaciente)
+    private fun setupUi() = with(binding) {
+        // Selección de paciente
+        acPaciente.setOnItemClickListener { _, _, position, _ ->
+            val display = acPaciente.adapter.getItem(position) as String
+            selected = pacientes.find { toDisplay(it) == display }
+            showSelected()
         }
 
-        binding.btnGenerarDiagnostico.setOnClickListener {
-            if (validarDatos()) {
-                generarDiagnostico()
+        btnCrearPaciente.setOnClickListener {
+            startActivity(Intent(requireContext(), RegisterPatientActivity::class.java))
+        }
+        btnVerDetalle.setOnClickListener {
+            val id = selected?.id ?: return@setOnClickListener
+            startActivity(
+                Intent(requireContext(), PatientDetailActivity::class.java)
+                    .putExtra("patient_id", id)
+            )
+        }
+
+        // Carga ECG
+        boxUpload.setOnClickListener {
+            pickEcg.launch(arrayOf("image/*", "application/pdf"))
+        }
+
+        // Analizar (mock)
+        btnAnalizar.setOnClickListener { runMockAnalysis() }
+    }
+
+    private fun observePatients() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            getPatientsUseCase().collectLatest { list ->
+                pacientes.clear()
+                pacientes.addAll(list)
+
+                val displays = pacientes.map { toDisplay(it) }
+                binding.acPaciente.setAdapter(
+                    ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, displays)
+                )
             }
-        }
-
-        binding.btnRecomendaciones.setOnClickListener {
-            val nombrePaciente = binding.etNombrePaciente.text.toString()
-            val intent = Intent(requireContext(), RecomendacionesActivity::class.java)
-            intent.putExtra("nombrePaciente", nombrePaciente)
-            startActivity(intent)
         }
     }
 
-    private fun setupObservers() {
-        viewModel.diagnostico.observe(viewLifecycleOwner, Observer { diagnostico ->
-            Toast.makeText(requireContext(), diagnostico, Toast.LENGTH_LONG).show()
-        })
-    }
-
-    private val pacienteUseCase = PacienteUseCase()
-
-    private fun buscarPaciente(nombre: String) {
-        pacienteUseCase.buscarPacientePorNombre(nombre, { paciente ->
-            paciente?.let {
-                binding.etGenero.setText(it.genero)
-                binding.etEdad.setText(it.edad.toString())
-            } ?: run {
-                Toast.makeText(requireContext(), "Paciente no encontrado", Toast.LENGTH_SHORT).show()
-            }
-        }, {
-            Toast.makeText(requireContext(), "Error al buscar paciente", Toast.LENGTH_SHORT).show()
-        })
-    }
-
-    private fun generarDiagnostico() {
-        val presionArterial = binding.etPresionArterial.text.toString().toFloat()
-        val colesterol = binding.etColesterol.text.toString().toFloat()
-        val azucarEnSangre = binding.spinnerAzucarEnSangre.selectedItemPosition
-        val restEcg = binding.spinnerRestEcg.selectedItemPosition
-        val frecuenciaCardiaca = binding.etFrecuenciaCardiaca.text.toString().toFloat()
-        val anginaEjercicio = binding.spinnerAnginaEjercicio.selectedItemPosition
-        val oldpeak = binding.etOldpeak.text.toString().toFloat()
-        val pendiente = binding.spinnerPendiente.selectedItemPosition
-        val vasosColoreados = binding.spinnerVasosColoreados.selectedItemPosition
-        val talasemia = binding.spinnerTalasemia.selectedItemPosition
-        val dolorPecho = binding.spinnerDolorPecho.selectedItemPosition
-
-        val nombrePaciente = binding.etNombrePaciente.text.toString()
-        val genero = binding.etGenero.text.toString()
-        val edad = binding.etEdad.text.toString().toInt()
-
-        val paciente = Paciente(nombre = nombrePaciente, genero = genero, edad = edad)
-
-        viewModel.generarDiagnostico(
-            paciente,
-            dolorPecho,
-            presionArterial,
-            colesterol,
-            azucarEnSangre,
-            restEcg,
-            frecuenciaCardiaca,
-            anginaEjercicio,
-            oldpeak,
-            pendiente,
-            vasosColoreados,
-            talasemia
-        )
-    }
-
-    private fun validarDatos(): Boolean {
-        val nombrePaciente = binding.etNombrePaciente.text.toString()
-        val presionArterial = binding.etPresionArterial.text.toString()
-        val colesterol = binding.etColesterol.text.toString()
-        val frecuenciaCardiaca = binding.etFrecuenciaCardiaca.text.toString()
-        val oldpeak = binding.etOldpeak.text.toString()
-        val genero = binding.etGenero.text.toString()
-        val edad = binding.etEdad.text.toString()
-
-        return when {
-            nombrePaciente.isEmpty() -> {
-                binding.etNombrePaciente.error = "Este campo es obligatorio"
-                false
-            }
-            presionArterial.isEmpty() -> {
-                binding.etPresionArterial.error = "Este campo es obligatorio"
-                false
-            }
-            colesterol.isEmpty() -> {
-                binding.etColesterol.error = "Este campo es obligatorio"
-                false
-            }
-            frecuenciaCardiaca.isEmpty() -> {
-                binding.etFrecuenciaCardiaca.error = "Este campo es obligatorio"
-                false
-            }
-            oldpeak.isEmpty() -> {
-                binding.etOldpeak.error = "Este campo es obligatorio"
-                false
-            }
-            genero.isEmpty() -> {
-                binding.etGenero.error = "Este campo es obligatorio"
-                false
-            }
-            edad.isEmpty() -> {
-                binding.etEdad.error = "Este campo es obligatorio"
-                false
-            }
-            else -> true
+    private fun toDisplay(p: Patient): String {
+        val nombre = when {
+            !p.nombreCompleto.isNullOrBlank() -> p.nombreCompleto!!
+            else -> listOfNotNull(p.nombres, p.apellidos).joinToString(" ").trim()
         }
+        val dni = p.dni.orEmpty()
+        return if (dni.isNotBlank()) "$nombre – $dni" else nombre
+    }
+
+    private fun showSelected() = with(binding) {
+        val p = selected
+        tvPacienteSeleccionado.text = "Paciente: " + (p?.let { toDisplay(it) } ?: "—")
+        tvEcgStatus.text = if (p?.ecgUrl.isNullOrBlank()) "Sin ECG cargado" else "ECG cargado"
+    }
+
+    private fun uploadEcg(uri: Uri) {
+        val p = selected ?: run {
+            Toast.makeText(requireContext(), "Selecciona un paciente primero", Toast.LENGTH_SHORT)
+                .show()
+            return
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val path = "patients/${p.id}/ecg/ecg_${System.currentTimeMillis()}"
+                val url = storageRepo.uploadSingle(uri, path)
+                val updated = p.copy(
+                    ecgUrl = url,
+                    ecgId = path.substringAfterLast('/'),
+                    ecgMime = requireContext().contentResolver.getType(uri)
+                )
+                setPatientUseCase(p.id!!, updated)
+                selected = updated
+                showSelected()
+                Toast.makeText(requireContext(), "ECG cargado", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    "Error al subir ECG: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    /**
+     * IMPORTANTE: ahora devuelve Unit (bloque), no expresión.
+     * Así evitamos el error de "expected Job, actual Unit" en los returns tempranos.
+     */
+    private fun runMockAnalysis() {
+        with(binding) {
+            val p = selected
+            if (p?.id.isNullOrEmpty()) {
+                Toast.makeText(requireContext(), "Selecciona un paciente", Toast.LENGTH_SHORT)
+                    .show()
+                return
+            }
+            if (p?.ecgUrl.isNullOrBlank()) {
+                Toast.makeText(requireContext(), "Carga un ECG para continuar", Toast.LENGTH_SHORT)
+                    .show()
+                return
+            }
+
+            // MOCK: resultados bonitos
+            val riesgo = listOf("Bajo", "Moderado", "Alto")[Random.nextInt(3)]
+            val pct = listOf(92, 94, 95, 96).random()
+            val ritmo = listOf("Sinusal", "Irregular").random()
+            val fc = listOf(76, 78, 80).random()
+            val pr = listOf(160, 170).random()
+            val qrs = listOf(90, 100).random()
+            val qt = listOf(390, 400, 410).random()
+            val qtc = listOf(420, 430).random()
+
+            tvInterpretacion.text = "ECG dentro de parámetros normales"
+            tvPrecision.text = "Precisión de IA: ${pct}%"
+            tvRiesgo.text = "Nivel de riesgo: $riesgo"
+            tvParametros.text =
+                "FC: ${fc} bpm   Ritmo: $ritmo   PR: ${pr} ms   QRS: ${qrs} ms   QT: ${qt} ms   QTc: ${qtc} ms"
+
+            tvTiempoIA.text = "Tiempo con IA: 2.3s"
+            tvTiempoManual.text = "Tiempo manual estimado: 15-20 min"
+            tvAhorro.text = "Tiempo ahorrado: ~18 min"
+
+            // Guardar en el paciente (solo riesgo/pct mock por ahora)
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val updated = p!!.copy(
+                        riesgo = riesgo.lowercase(Locale.getDefault()),
+                        riesgoPct = pct
+                    )
+                    setPatientUseCase(p.id!!, updated)
+                    selected = updated
+                    Toast.makeText(
+                        requireContext(),
+                        "Resultados guardados (mock)",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        requireContext(),
+                        "No se pudo guardar resultados: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
+
 
 
 

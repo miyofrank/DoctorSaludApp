@@ -123,6 +123,7 @@
     <color name="chip_red_bg">#FFEBEE</color>
     <color name="chip_red_border">#FFCDD2</color>
     <color name="chip_red_text">#B71C1C</color>
+    <color name="black_40">#66000000</color>
 
 
 </resources>

@@ -1,345 +1,324 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/rootScroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.view.Fragment.AnalisisFragment">
+    android:fillViewport="true"
+    android:background="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
+        <!-- Encabezado -->
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/tvTitulo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="20dp"
             android:text="Análisis de ECG"
-            android:textColor="@color/black"
-            android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/tvSubtitulo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:paddingStart="20dp"
+            android:layout_marginTop="4dp"
             android:text="Carga y analiza electrocardiogramas con IA"
-            android:textColor="@color/gray"
-            android:textSize="16sp" />
+            android:textColor="@color/black_60" />
 
-        <LinearLayout
+        <!-- Buscar/Seleccionar paciente -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:layout_margin="16dp"
-            android:background="@drawable/redondo_fondo"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <EditText
-                android:id="@+id/etNombrePaciente"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:visibility="gone" />
-
-            <Button
-                android:id="@+id/btnBuscarPaciente"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="#FF5858"
-                android:text="Seleccionar ECG"
-                android:textColor="@color/white" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Toca para seleccionar archivo ECG"
-                android:textColor="@color/gray" />
-        </LinearLayout>
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Seleccionar paciente"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:startIconDrawable="@drawable/ic_search_24">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/acPaciente"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Busca por nombre o DNI"
+                        android:inputType="text"
+                        android:padding="12dp"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/tvPacienteSeleccionado"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textColor="@color/black_60"
+                    android:text="Paciente: —"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-
-                        <EditText
-                            android:id="@+id/etGenero"
-                            android:layout_width="150dp"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:background="@drawable/sombra"
-                            android:editable="false"
-                            android:hint="Género"
-                            android:paddingStart="16dp"
-                            android:textColor="@color/black"
-                            android:textColorHint="@color/gray"
-                            android:textSize="20sp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnVerDetalle"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:text="Ver detalles"/>
 
-                        <EditText
-                            android:id="@+id/etEdad"
-                            android:layout_width="150dp"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_margin="8dp"
-                            android:background="@drawable/sombra"
-                            android:editable="false"
-                            android:hint="Edad"
-                            android:paddingStart="16dp"
-                            android:textColor="@color/black"
-                            android:textColorHint="@color/gray"
-                            android:textSize="20sp" />
-                    </LinearLayout>
+                    <Space
+                        android:layout_width="8dp"
+                        android:layout_height="1dp"/>
 
-
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCrearPaciente"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Registrar paciente"
+                        app:backgroundTint="@color/primaryBlue"
+                        android:textColor="@android:color/white"/>
                 </LinearLayout>
-
-
-                <TextView
-                    android:id="@+id/tvDolorPecho"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:text="Tipo de dolor de pecho:"
-                    android:textColor="@color/black" />
-
-                <androidx.appcompat.widget.AppCompatSpinner
-                    android:id="@+id/spinnerDolorPecho"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/spinner_background"
-                    android:padding="16dp"
-                    android:spinnerItemStyle="@style/SpinnerTextStyle"
-                    android:spinnerMode="dropdown"
-                    android:textColor="@color/black"
-                    android:textColorHighlight="@color/black"
-                    android:textColorHint="@color/black"
-                    android:textSize="20sp" />
-
-                <EditText
-                    android:id="@+id/etPresionArterial"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/sombra"
-                    android:hint="Presión Arterial en Reposo"
-                    android:inputType="number"
-                    android:paddingStart="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <EditText
-                    android:id="@+id/etColesterol"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/sombra"
-                    android:hint="Nivel de Colesterol"
-                    android:inputType="number"
-                    android:paddingStart="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:id="@+id/tvAzucarEnSangre"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:text="Azúcar en Sangre en Ayunas:" />
-
-                <Spinner
-                    android:id="@+id/spinnerAzucarEnSangre"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/spinner_background"
-                    android:padding="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:id="@+id/tvRestEcg"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:text="Resultado ECG en Reposo:" />
-
-                <Spinner
-                    android:id="@+id/spinnerRestEcg"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/spinner_background"
-                    android:padding="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <EditText
-                    android:id="@+id/etFrecuenciaCardiaca"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/sombra"
-                    android:hint="Frecuencia Cardíaca Máxima"
-                    android:inputType="number"
-                    android:paddingStart="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:id="@+id/tvAnginaEjercicio"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:text="Angina Inducida por Ejercicio:" />
-
-                <Spinner
-                    android:id="@+id/spinnerAnginaEjercicio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/spinner_background"
-                    android:padding="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <EditText
-                    android:id="@+id/etOldpeak"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/sombra"
-                    android:hint="Oldpeak"
-                    android:inputType="numberDecimal"
-                    android:paddingStart="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:id="@+id/tvPendiente"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:text="Pendiente del Segmento ST:" />
-
-                <Spinner
-                    android:id="@+id/spinnerPendiente"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/spinner_background"
-                    android:padding="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:id="@+id/tvVasosColoreados"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:text="Vasos Coloreados por Fluoroscopia:" />
-
-                <Spinner
-                    android:id="@+id/spinnerVasosColoreados"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/spinner_background"
-                    android:padding="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:id="@+id/tvTalasemia"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:text="Talasemia:" />
-
-                <Spinner
-                    android:id="@+id/spinnerTalasemia"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/spinner_background"
-                    android:padding="16dp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/gray"
-                    android:textSize="20sp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/btnGenerarDiagnostico"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="1"
-                        android:backgroundTint="@color/black"
-                        android:text="Generar Diagnóstico"
-                        android:textColor="@color/white" />
-
-                    <Button
-                        android:id="@+id/btnRecomendaciones"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="1"
-                        android:backgroundTint="@color/black"
-                        android:text="Ver Recomendaciones"
-                        android:textColor="@color/white" />
-                </LinearLayout>
-
             </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
+        <!-- Cargar ECG -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardUseCompatPadding="true">
 
-        </ScrollView>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cargar ECG"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
+
+                <LinearLayout
+                    android:id="@+id/boxUpload"
+                    android:layout_width="match_parent"
+                    android:layout_height="140dp"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:background="@drawable/bg_dashed_upload">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:src="@drawable/ic_cloud_upload_24"/>
+
+                        <TextView
+                            android:id="@+id/tvUploadHint"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="Toca para seleccionar archivo ECG"
+                            android:textColor="@color/black_60"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="JPG, PNG, PDF hasta 10MB"
+                            android:textSize="12sp"
+                            android:textColor="@color/black_40"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvEcgStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Sin ECG cargado"
+                    android:textColor="@color/black_60"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAnalizar"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Analizar ahora (mock)"
+                    app:backgroundTint="@color/primaryBlue"
+                    android:textColor="@android:color/white"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Resultados -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Resultados del análisis"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Interpretación: "/>
+
+                    <TextView
+                        android:id="@+id/tvInterpretacion"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_chip_green"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:paddingTop="3dp"
+                        android:paddingBottom="3dp"
+                        android:text="—"
+                        android:textColor="@color/chip_green_text"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvPrecision"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Precisión de IA: —"/>
+
+                <TextView
+                    android:id="@+id/tvRiesgo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Nivel de riesgo: —"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Parámetros -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Parámetros del ECG"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
+
+                <TextView
+                    android:id="@+id/tvParametros"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="FC: —   Ritmo: —   PR: —   QRS: —   QT: —   QTc: —"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Eficiencia -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Eficiencia del análisis"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
+
+                <TextView
+                    android:id="@+id/tvTiempoIA"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Tiempo con IA: —"/>
+
+                <TextView
+                    android:id="@+id/tvTiempoManual"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Tiempo manual estimado: —"/>
+
+                <TextView
+                    android:id="@+id/tvAhorro"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Tiempo ahorrado: —"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <Space
+            android:layout_width="1dp"
+            android:layout_height="24dp"/>
     </LinearLayout>
-
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

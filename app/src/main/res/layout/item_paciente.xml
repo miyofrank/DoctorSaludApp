@@ -1,181 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@drawable/background_card"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardUseCompatPadding="true"
+    app:strokeWidth="0dp">
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="240dp"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header: nombre + chip estado -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:text="Nombre completo:"
-                android:textColor="@color/black" />
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/tvNombre"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Nombre"
-                    android:textColor="@color/text_color"
-                    android:textSize="16sp" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text=" "
-                    android:textColor="@color/text_color"
-                    android:textSize="16sp" />
-                <TextView
-                    android:id="@+id/tvApellidos"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="Apellidos"
-                    android:textColor="@color/text_color"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:text="Edad: "
-                    android:textColor="@color/black" />
-                <TextView
-                    android:id="@+id/tvEdad"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_gravity="center"
-                    android:text="Edad"
-                    android:layout_weight="1"
-                    android:textColor="@color/text_color"
-                    android:textSize="16sp" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:text="Genero: "
-                    android:textColor="@color/black" />
-                <TextView
-                    android:id="@+id/tvGenero"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:text="Género"
-                    android:textColor="@color/text_color"
-                    android:textSize="16sp" />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:text="Correo: "
-                    android:textColor="@color/black" />
-                <TextView
-                    android:id="@+id/tvCorreo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Correo"
-                    android:textColor="@color/text_color"
-                    android:textSize="16sp" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:text="Dirección: "
-                    android:textColor="@color/black" />
-
-                <TextView
-                    android:id="@+id/tvDireccion"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Direccion"
-                    android:textColor="@color/text_color"
-                    android:textSize="16sp" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:text="Fecha: "
-                    android:textColor="@color/black" />
-                <TextView
-                    android:id="@+id/tvFecha"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Fecha de nacimiento"
-                    android:textColor="@color/text_color"
-                    android:textSize="16sp" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:text="Telefono: "
-                    android:textColor="@color/black" />
-                <TextView
-                    android:id="@+id/tvTelefono"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Teléfono"
-                    android:textColor="@color/text_color"
-                    android:textSize="16sp" />
-            </LinearLayout>
-
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_weight="2.4"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/ivFoto"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_gravity="center"
-                android:layout_marginTop="30dp"
-                android:layout_weight="0.5"
-                android:scaleType="centerCrop"
-                app:shapeAppearanceOverlay="@style/CornerSize50"
-                app:strokeColor="@android:color/white"
-                app:strokeWidth="1.5dp"
-                android:src="@drawable/com_facebook_profile_picture_blank_square" />
-            <Button
-                android:id="@+id/btnDelete"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvNombre"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Nombre Apellido"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/chipEstado"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:backgroundTint="@color/black"
-                android:text="Eliminar"
-                android:textColor="@color/white" />
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:text="En evaluación"
+                android:textSize="12sp"
+                android:textColor="@color/chip_orange_text"
+                android:background="@drawable/bg_chip_orange"/>
         </LinearLayout>
 
-    </LinearLayout>
+        <!-- DNI -->
+        <TextView
+            android:id="@+id/tvDni"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="DNI:"
+            android:textColor="@color/black_60"
+            android:textSize="12sp" />
 
-</LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="8dp"/>
+
+        <!-- Edad / Sexo -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvEdad"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Edad:"
+                android:textColor="@color/black_60"
+                android:textSize="13sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tvSexo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Sexo:"
+                android:textColor="@color/black_60"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
+        <!-- Cirugía / Fecha -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:id="@+id/tvCirugia"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Cirugía:"
+                android:textColor="@color/black_60"
+                android:textSize="13sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tvFecha"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Fecha:"
+                android:textColor="@color/black_60"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
+        <!-- Chip riesgo -->
+        <TextView
+            android:id="@+id/chipRiesgo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:text="Bajo"
+            android:textSize="12sp"
+            android:textColor="@color/chip_green_text"
+            android:background="@drawable/bg_chip_green" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="8dp"/>
+
+        <!-- Botones -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnVerDetalles"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="10"
+                android:paddingHorizontal="10dp"
+                android:text="Ver detalles"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/black_60" />
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:layout_height="wrap_content">
+            </Space>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnVerEcg"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="10"
+                android:paddingHorizontal="10dp"
+                android:text="Ver ECG"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/black_60" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

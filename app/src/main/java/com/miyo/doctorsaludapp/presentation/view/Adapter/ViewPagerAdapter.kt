@@ -1,11 +1,14 @@
+
 package com.miyo.doctorsaludapp.presentation.view.Adapter
 
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import dagger.hilt.android.AndroidEntryPoint
 
-class ViewPagerAdapter(activity: AppCompatActivity, private val fragments: List<Fragment>) : FragmentStateAdapter(activity) {
+class ViewPagerAdapter(
+    activity: FragmentActivity,
+    private val fragments: List<Fragment>
+) : FragmentStateAdapter(activity) {
     override fun getItemCount(): Int = fragments.size
     override fun createFragment(position: Int): Fragment = fragments[position]
 }

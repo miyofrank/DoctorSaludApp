@@ -13,7 +13,17 @@
         app:navigationIcon="@drawable/ic_arrow_back_24_si"
         app:title="ECG" />
 
+    <ProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:visibility="gone" />
+
     <ScrollView
+        android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
@@ -65,48 +75,69 @@
                 android:textStyle="bold"
                 android:textColor="@color/black"/>
 
-            <com.google.android.material.card.MaterialCardView
+            <ImageView
+                android:id="@+id/ivEcg"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:layout_marginTop="8dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/bg_image_placeholder"/>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:cardCornerRadius="16dp"
-                app:cardUseCompatPadding="true">
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/tvEcgStatus"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/black_60"
+                    android:text="Sin ECG cargado"/>
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/tvEcgStatus"
-                        android:layout_width="match_parent"
+                        android:id="@+id/chipRiesgo"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/black_60"
-                        android:text="Sin ECG cargado"/>
+                        android:background="@drawable/bg_chip_green"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:text="Bajo"
+                        android:textColor="@color/chip_green_text"
+                        android:textSize="12sp"
+                        android:visibility="gone" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnAbrirEcg"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="match_parent"
+                    <Space
+                        android:layout_width="6dp"
+                        android:layout_height="1dp"/>
+
+                    <TextView
+                        android:id="@+id/chipAnalizado"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Abrir/Descargar ECG"/>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSubirEcg"
-                        style="@style/Widget.MaterialComponents.Button"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Cargar/Actualizar ECG"
-                        app:backgroundTint="@color/primaryBlue"
-                        android:textColor="@android:color/white"/>
-
+                        android:background="@drawable/bg_chip_green"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:text="Analizado"
+                        android:textColor="@color/chip_green_text"
+                        android:textSize="12sp"
+                        android:visibility="gone" />
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
-            <!-- Resultados IA (mock) -->
+            <!-- Resultados IA (KPIs y parámetros) -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -128,45 +159,17 @@
                         android:textColor="@color/black"/>
 
                     <TextView
-                        android:id="@+id/tvInterpretacion"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Interpretación: "/>
-
-                    <TextView
                         android:id="@+id/tvPrecision"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Precisión de IA: "/>
+                        android:layout_marginTop="8dp"
+                        android:text="Precisión de IA: —"/>
 
                     <TextView
                         android:id="@+id/tvRiesgo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Nivel de riesgo: "/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Parámetros (mock) -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardUseCompatPadding="true">
-                <LinearLayout
-                    android:padding="16dp"
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Parámetros medidos"
-                        android:textStyle="bold"
-                        android:textColor="@color/black"/>
+                        android:text="Nivel de riesgo: —"/>
 
                     <TextView
                         android:id="@+id/tvParametros"
@@ -177,26 +180,104 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Acciones -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnNuevoAnalisis"
-                style="@style/Widget.MaterialComponents.Button"
+            <!-- Interpretación destacada -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Realizar nuevo análisis"
-                app:backgroundTint="@color/primaryBlue"
-                android:textColor="@android:color/white"/>
+                app:cardCornerRadius="16dp"
+                app:cardUseCompatPadding="true">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="6dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/green_100" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Interpretación"
+                            android:textStyle="bold"
+                            android:textColor="@color/black" />
+
+                        <TextView
+                            android:id="@+id/tvInterpretacion"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="Interpretación: —"
+                            android:textColor="@color/black_60" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Recomendación destacada -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardUseCompatPadding="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:id="@+id/vRecoStrip"
+                        android:layout_width="6dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/green_100" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Recomendación"
+                            android:textStyle="bold"
+                            android:textColor="@color/black" />
+
+                        <TextView
+                            android:id="@+id/tvRecomendacion"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="Recomendación: —"
+                            android:textColor="@color/black_60" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Acciones -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnVerDetalle"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:text="Ver detalles del paciente"/>
 
         </LinearLayout>
     </ScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+

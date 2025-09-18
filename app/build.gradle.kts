@@ -63,6 +63,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    // Graficos
+    implementation("com.github.PhilJay:MPAndroidChart:3.1.0")
     // Coil imagen
     implementation("io.coil-kt:coil:2.7.0")
     // http

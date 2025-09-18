@@ -2,18 +2,12 @@ package com.miyo.doctorsaludapp.domain.usecase.ecg
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.miyo.doctorsaludapp.data.repository.FirestoreEcgRepository
-import com.miyo.doctorsaludapp.domain.model.EcgAnalysis
 
-class SaveEcgAnalysisUseCase(
+class MarkEcgAnalysisStartUseCase(
     private val repo: FirestoreEcgRepository =
         FirestoreEcgRepository(FirebaseFirestore.getInstance(), "pacientes")
 ) {
-    suspend operator fun invoke(
-        patientId: String,
-        ecgId: String,
-        analysis: EcgAnalysis,
-        durationMs: Long? = null
-    ) {
-        repo.saveAnalysis(patientId, ecgId, analysis, durationMs)
+    suspend operator fun invoke(patientId: String, ecgId: String) {
+        repo.markAnalysisStart(patientId, ecgId)
     }
 }

@@ -23,6 +23,7 @@ import com.miyo.doctorsaludapp.data.repository.FirestorePatientRepository
 import com.miyo.doctorsaludapp.databinding.FragmentAnalisisBinding
 import com.miyo.doctorsaludapp.domain.model.EcgAnalysis
 import com.miyo.doctorsaludapp.domain.model.Patient
+import com.miyo.doctorsaludapp.domain.usecase.ecg.MarkEcgAnalysisStartUseCase
 import com.miyo.doctorsaludapp.domain.usecase.ecg.SaveEcgAnalysisUseCase
 import com.miyo.doctorsaludapp.domain.usecase.ecg.UpsertEcgMetaUseCase
 import com.miyo.doctorsaludapp.domain.usecase.patient.GetPatientsUseCase
@@ -57,6 +58,8 @@ class AnalisisFragment : Fragment() {
     private val setPatientUseCase by lazy { SetPatientUseCase(patientRepo) }
     private val upsertEcgMetaUseCase by lazy { UpsertEcgMetaUseCase(ecgRepo) }
     private val saveEcgAnalysisUseCase by lazy { SaveEcgAnalysisUseCase(ecgRepo) }
+    private val markEcgAnalysisStartUseCase by lazy { MarkEcgAnalysisStartUseCase(ecgRepo) }
+
 
     private val storageRepo by lazy { FirebaseStorageRepository(storage, requireContext().contentResolver) }
 
@@ -171,6 +174,7 @@ class AnalisisFragment : Fragment() {
         }
     }
 
+
     private fun toDisplay(p: Patient): String {
         val nombre = when {
             !p.nombreCompleto.isNullOrBlank() -> p.nombreCompleto!!
@@ -194,6 +198,7 @@ class AnalisisFragment : Fragment() {
         }
         refreshButtons()
     }
+
 
     // --------------------------------------------------------------------------------------------
     // Subida a Storage + creación/actualización del documento ECG
@@ -275,82 +280,61 @@ class AnalisisFragment : Fragment() {
             Toast.makeText(requireContext(), "Carga un ECG para continuar", Toast.LENGTH_SHORT).show()
             return
         }
-        if (isAnalyzing || isUploading) return
 
-        isAnalyzing = true
-        showLoading(true)
-        refreshButtons()
-
-        with(binding) {
-            tvInterpretacion.text = "Analizando…"
-            tvPrecision.text = "Precisión de IA: —"
-            tvRiesgo.text = "Nivel de riesgo: —"
-            tvParametros.text = "FC: —   Ritmo: —   PR: —   QRS: —   QT: —   QTc: —"
-            tvTiempoIA.text = "Tiempo con IA: —"
-            tvTiempoManual.text = "Tiempo manual estimado: 15-20 min"
-            tvAhorro.text = "Tiempo ahorrado: —"
-        }
+        // deshabilitar UI mientras corre
+        binding.btnAnalizar.isEnabled = false
+        binding.boxUpload.isEnabled = false
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val startTs = System.nanoTime()
+            val startNs = System.nanoTime()
             try {
-                val ref = storage.getReferenceFromUrl(p!!.ecgUrl!!)
+                // 1) MARCAR INICIO en servidor (timestamps)
+                markEcgAnalysisStartUseCase(p.id!!, p.ecgId!!)
+
+                // 2) Descarga bytes y llama a Gemini
+                val ref = FirebaseStorage.getInstance().getReferenceFromUrl(p.ecgUrl!!)
                 val bytes = ref.getBytes(10L * 1024L * 1024L).await()
-                val mime = p.ecgMime ?: if (bytes.take(3) == listOf(0xFF.toByte(), 0xD8.toByte(), 0xFF.toByte())) "image/jpeg" else "image/png"
+                val mime = p.ecgMime ?: "image/jpeg"
 
-                // 1) Llamada a Gemini
-                val result = GeminiAnalyzer.analyze(requireContext(), bytes, mime)
-                val analysis: EcgAnalysis = GeminiAnalyzer.toAnalysis(result)
+                val ai = GeminiAnalyzer.analyze(requireContext(), bytes, mime)
 
-                // 2) Guardar en subcolección ecgs/{ecgId}
-                saveEcgAnalysisUseCase(patientId = p.id!!, ecgId = p.ecgId!!, analysis = analysis)
-
-                // 3) Rellenar UI
-                with(binding) {
-                    tvInterpretacion.text = analysis.interpretacion.ifBlank { "—" }
-                    tvPrecision.text = "Precisión de IA: ${analysis.precisionIA?.let { String.format(Locale.getDefault(), "%.2f", it) } ?: "—"}"
-                    tvRiesgo.text = "Nivel de riesgo: ${analysis.nivelRiesgo}"
-                    tvParametros.text = buildString {
-                        append("FC: ${analysis.fc_bpm ?: "-"} bpm   ")
-                        append("Ritmo: ${analysis.ritmo}   ")
-                        append("PR: ${analysis.pr_ms ?: "-"} ms   ")
-                        append("QRS: ${analysis.qrs_ms ?: "-"} ms   ")
-                        append("QT: ${analysis.qt_ms ?: "-"} ms   ")
-                        append("QTc: ${analysis.qtc_ms ?: "-"} ms")
-                    }
-                    val iaTimeMs = (System.nanoTime() - startTs) / 1_000_000.0
-                    tvTiempoIA.text = "Tiempo con IA: ${String.format(Locale.getDefault(), "%.1f", iaTimeMs/1000.0)}s"
-                    tvAhorro.text = "Tiempo ahorrado: ~18 min"
-                }
-
-                // 4) Resumen en paciente (como ya hacías)
-                val pct = when (analysis.nivelRiesgo.lowercase(Locale.getDefault())) {
-                    "alto" -> 85
-                    "moderado" -> 55
-                    else -> 15
-                }
-                val updated = p.copy(
-                    riesgo = analysis.nivelRiesgo.lowercase(Locale.getDefault()),
-                    riesgoPct = pct
+                val analysis = EcgAnalysis(
+                    ritmo = ai.ritmo,
+                    fc_bpm = ai.fc_bpm,
+                    pr_ms = ai.pr_ms,
+                    qrs_ms = ai.qrs_ms,
+                    qt_ms = ai.qt_ms,
+                    qtc_ms = ai.qtc_ms,
+                    precisionIA = ai.precisionIA,
+                    nivelRiesgo = ai.nivelRiesgo,
+                    interpretacion = ai.interpretacion,
+                    recomendacion = ai.recomendacion,
+                    updatedAt = java.util.Date(),
+                    source = "gemini"
                 )
-                setPatientUseCase(p.id!!, updated)
-                selected = updated
-                showSelected()
+
+                // 3) Duración exacta en ms medida en cliente
+                val durationMs = ((System.nanoTime() - startNs) / 1_000_000.0).toLong()
+
+                // 4) GUARDAR resultado + FIN + durationMs
+                saveEcgAnalysisUseCase(p.id!!, p.ecgId!!, analysis, durationMs)
+
+                // 5) Actualizar UI
+                val iaSec = durationMs / 1000.0
+                binding.tvInterpretacion.text = analysis.interpretacion ?: "—"
+                binding.tvPrecision.text = "Precisión de IA: ${analysis.precisionIA?.let { "%.1f".format(it) } ?: "—"}%"
+                binding.tvRiesgo.text = "Nivel de riesgo: ${analysis.nivelRiesgo ?: "—"}"
+                binding.tvParametros.text = "FC: ${analysis.fc_bpm ?: "—"} bpm   Ritmo: ${analysis.ritmo ?: "—"}   PR: ${analysis.pr_ms ?: "—"} ms   QRS: ${analysis.qrs_ms ?: "—"} ms   QT: ${analysis.qt_ms ?: "—"} ms   QTc: ${analysis.qtc_ms ?: "—"} ms"
+                binding.tvTiempoIA.text = "Tiempo con IA: ${"%.1f".format(iaSec)}s"
+                binding.tvTiempoManual.text = "Tiempo manual estimado: 15.5 min"
+                binding.tvAhorro.text = "Tiempo ahorrado: ${"%.1f".format(15.5 - iaSec/60.0)} min"
 
                 Toast.makeText(requireContext(), "Análisis guardado", Toast.LENGTH_SHORT).show()
-
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Error al analizar: ${e.message}", Toast.LENGTH_LONG).show()
-
-                // (Opcional) mock mínimo para no dejar vacío
-                val riesgo = listOf("Bajo", "Moderado", "Alto")[Random.nextInt(3)]
-                binding.tvInterpretacion.text = "No se pudo completar el análisis"
-                binding.tvPrecision.text = "Precisión de IA: ${Random.nextDouble(96.1, 99.9)}"
-                binding.tvRiesgo.text = "Nivel de riesgo: $riesgo"
+                Toast.makeText(requireContext(), "Error en análisis: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
-                isAnalyzing = false
-                showLoading(false)
-                refreshButtons()
+                binding.btnAnalizar.isEnabled = true
+                binding.boxUpload.isEnabled = true
             }
         }
     }

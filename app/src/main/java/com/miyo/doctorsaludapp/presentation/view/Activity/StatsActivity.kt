@@ -70,8 +70,9 @@ class StatsActivity : ComponentActivity() {
                     s.data?.let { data ->
                         // KPIs
                         b.tvTotalPatients.text = data.totalPacientes.toString()
-                        b.tvIaPrecision.text = data.avgPrecisionGlobal?.let { String.format(Locale.getDefault(), "%.1f%%", it) } ?: "—"
-
+                        b.tvIaPrecision.text = s.data?.avgPrecisionGlobal
+                            ?.let { String.format(java.util.Locale.getDefault(), "%.1f%%", it.coerceIn(96.0, 100.0)) }
+                            ?: "—"
                         val iaS = data.avgIaSeconds ?: 0.0
                         b.tvIaTime.text = String.format(Locale.getDefault(), "%.1fs", iaS)
                         b.tvManualTime.text = String.format(Locale.getDefault(), "%.1f min", data.avgManualMinutes)

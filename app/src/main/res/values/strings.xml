@@ -13,11 +13,12 @@
     <string name="facebook_app_id">485207894182831</string>
     <string name="fb_login_protocol_scheme">fb485207894182831</string>
     <string name="facebook_client_token">6fcfed8f7187b04b8bea6aeaa545c2c2</string>
+    <string name="analizar_gemini">Analizar ahora</string>
+
 
     <string name="register_here">No tienes una cuenta aún? <font color="#ff0000">Registrate aquí</font></string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-
 
 
 </resources>

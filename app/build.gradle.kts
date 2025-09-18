@@ -10,7 +10,7 @@ android {
     namespace = "com.miyo.doctorsaludapp"
     compileSdk = 36
 
-    defaultConfig {
+    defaultConfig({
         applicationId = "com.miyo.doctorsaludapp"
         minSdk = 26
         targetSdk = 34
@@ -18,7 +18,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
+
+    })
 
     buildTypes {
         release {
@@ -37,6 +38,9 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
+        buildConfig = true
+    }
+    buildFeatures {
         viewBinding = true
     }
     viewBinding {
@@ -47,6 +51,10 @@ android {
     }
     buildToolsVersion = "35.0.0"
     ndkVersion = "29.0.13113456 rc1"
+    defaultConfig {
+        buildConfigField("String", "GOOGLE_AI_API_KEY", "\"${project.findProperty("GOOGLE_AI_API_KEY") ?: ""}\"")
+    }
+
 }
 
 dependencies {
@@ -55,7 +63,15 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-//
+    // Graficos
+    implementation("com.github.PhilJay:MPAndroidChart:3.1.0")
+    // Coil imagen
+    implementation("io.coil-kt:coil:2.7.0")
+    // http
+    implementation("com.squareup.okhttp3:okhttp:5.1.0")
+    // Gemini AI
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    // Facebook
     implementation(libs.facebook.android.sdk.vlatestrelease)
     // Fragment
     implementation(libs.androidx.fragment.ktx)

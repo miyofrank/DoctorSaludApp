@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     android:background="@color/white">
 
     <LinearLayout
@@ -11,111 +12,258 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Título y subtítulo -->
         <TextView
-            android:id="@+id/tvPerfilTitulo"
+            android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Perfil del usuario"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:paddingBottom="8dp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="end">
-
-            <Button
-                android:id="@+id/btnEditarPerfil"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Editar"/>
-        </LinearLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Nombre">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPerfilNombre"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Apellidos">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPerfilApellidos"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Correo electrónico">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPerfilCorreo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Especialidad">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPerfilEspecialidad"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Hospital">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPerfilHospital"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Número de colegiatura">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPerfilColegiatura"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Teléfono">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPerfilTelefono"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-        </com.google.android.material.textfield.TextInputLayout>
+            android:textColor="@color/black"
+            android:textSize="22sp"
+            android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/tvPerfilPreferencias"
+            android:id="@+id/tvSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Preferencias"
-            android:textStyle="bold"
-            android:paddingTop="16dp"/>
+            android:layout_marginTop="4dp"
+            android:text="Gestiona tu información personal y preferencias"
+            android:textColor="@color/black_60" />
 
+        <!-- Card: Información personal -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardUseCompatPadding="true"
+            app:cardCornerRadius="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/tvInfoHeader"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Información personal"
+                        android:textColor="@color/black"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnEdit"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:text="Editar" />
+                </RelativeLayout>
+
+                <!-- Nombre / Apellidos -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Nombre">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etNombres"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="false"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <Space
+                        android:layout_width="12dp"
+                        android:layout_height="1dp"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Apellidos">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etApellidos"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="false"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
+                <!-- Correo -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Correo electrónico">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:inputType="textEmailAddress"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Especialidad -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Especialidad">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEspecialidad"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Hospital -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Hospital">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etHospital"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- CMP -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Número de colegiatura">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etColegiatura"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Teléfono -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Teléfono">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etTelefono"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:inputType="phone"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Acciones edición -->
+                <LinearLayout
+                    android:id="@+id/actionsEdit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnGuardar"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Guardar"
+                        app:backgroundTint="@color/primaryBlue"
+                        android:textColor="@android:color/white"/>
+
+                    <Space
+                        android:layout_width="12dp"
+                        android:layout_height="1dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCancelar"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Cancelar"/>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Card: Preferencias -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardUseCompatPadding="true"
+            app:cardCornerRadius="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Preferencias"
+                    android:textColor="@color/black"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Análisis automático"
+                        android:textColor="@color/black"/>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchAuto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvAutoHint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Si está activo, al subir un ECG se ejecutará el análisis automáticamente."
+                    android:textColor="@color/black_60" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <Space
+            android:layout_width="1dp"
+            android:layout_height="24dp"/>
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>
+

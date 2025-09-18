@@ -63,7 +63,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-
+    // Coil imagen
+    implementation("io.coil-kt:coil:2.7.0")
     // http
     implementation("com.squareup.okhttp3:okhttp:5.1.0")
     // Gemini AI

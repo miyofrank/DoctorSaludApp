@@ -1,16 +1,25 @@
 package com.miyo.doctorsaludapp.domain.model
 
+import androidx.annotation.Keep
+import java.io.Serializable
+import java.util.Date
+
+@Keep
 data class EcgAnalysis(
-    val source: String = "gemini",
-    val ritmo: String,
-    val fc_bpm: Int?,
-    val pr_ms: Double?,
-    val qrs_ms: Double?,
-    val qt_ms: Double?,
-    val qtc_ms: Double?,
-    val precisionIA: Double?,
-    val nivelRiesgo: String,
-    val interpretacion: String,
-    val recomendacion: String,
-    val updatedAt: Long
-)
+    var source: String = "gemini",
+    var ritmo: String = "Desconocido",
+    var fc_bpm: Int? = null,
+    var pr_ms: Double? = null,
+    var qrs_ms: Double? = null,
+    var qt_ms: Double? = null,
+    var qtc_ms: Double? = null,
+    var precisionIA: Double? = null,
+    var nivelRiesgo: String = "Bajo",
+    var interpretacion: String = "",
+    var recomendacion: String = "",
+
+    var createdAt: Date? = null,
+    var updatedAt: Date? = null
+) : Serializable {
+    constructor() : this(source = "gemini")
+}

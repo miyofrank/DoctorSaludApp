@@ -1,15 +1,14 @@
 package com.miyo.doctorsaludapp.data.ai
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.google.ai.client.generativeai.type.content
 import com.miyo.doctorsaludapp.domain.model.EcgAiResult
+import com.miyo.doctorsaludapp.domain.model.EcgAnalysis
 import org.json.JSONObject
+import java.util.Date
 
-/**
- * Analiza un ECG (imagen) con Gemini y devuelve EcgAiResult.
- * JSON mode ya está configurado en el modelo (GeminiClient).
- */
 object GeminiAnalyzer {
 
     private fun prompt(): String = """
@@ -33,21 +32,19 @@ object GeminiAnalyzer {
     - Si no puedes estimar un valor, usa null. No agregues nada fuera del JSON.
   """.trimIndent()
 
+    // === Core JSON mode ===
     suspend fun analyze(context: Context, bytes: ByteArray, mime: String): EcgAiResult {
-        // Convierte a Bitmap para el DSL (tu SDK no tiene inlineData)
         val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             ?: error("La imagen no es válida. Usa JPG/PNG.")
+        return analyze(context, bitmap)
+    }
 
-        // Construye el contenido con el DSL
+    suspend fun analyze(context: Context, bitmap: Bitmap): EcgAiResult {
         val req = content {
             text(prompt())
             image(bitmap)
         }
-
-        // Llama al modelo (el JSON mode ya está puesto en GeminiClient)
         val resp = GeminiClient.get(context).generateContent(req)
-
-        // Parseo del JSON
         val json = resp.text ?: "{}"
         val o = JSONObject(json)
         return EcgAiResult(
@@ -63,5 +60,24 @@ object GeminiAnalyzer {
             recomendacion = o.optString("recomendacion", "")
         )
     }
-}
 
+    // === Mapeo a EcgAnalysis ===
+    fun toAnalysis(result: EcgAiResult): EcgAnalysis {
+        val now = Date()
+        return EcgAnalysis(
+            source = "gemini",
+            ritmo = result.ritmo,
+            fc_bpm = result.fc_bpm,
+            pr_ms = result.pr_ms,
+            qrs_ms = result.qrs_ms,
+            qt_ms = result.qt_ms,
+            qtc_ms = result.qtc_ms,
+            precisionIA = result.precisionIA,
+            nivelRiesgo = result.nivelRiesgo,
+            interpretacion = result.interpretacion,
+            recomendacion = result.recomendacion,
+            createdAt = now,
+            updatedAt = now
+        )
+    }
+}

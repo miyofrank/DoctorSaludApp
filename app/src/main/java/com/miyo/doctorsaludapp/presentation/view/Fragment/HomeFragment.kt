@@ -18,6 +18,7 @@ import com.miyo.doctorsaludapp.domain.model.Patient
 import com.miyo.doctorsaludapp.presentation.adapters.RecentPatientsAdapter
 import com.miyo.doctorsaludapp.presentation.view.Activity.PatientDetailActivity
 import com.miyo.doctorsaludapp.presentation.view.Activity.RegisterPatientActivity
+import com.miyo.doctorsaludapp.presentation.view.Activity.StatsActivity
 import com.miyo.doctorsaludapp.presentation.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -55,7 +56,7 @@ class HomeFragment : Fragment() {
             // Si tienes NavGraph con destino Estadistica
             try {
 
-                startActivity(Intent(requireContext(), com.miyo.doctorsaludapp.presentation.view.activity.StatsActivity::class.java))
+                startActivity(Intent(requireContext(), StatsActivity::class.java))
 
             } catch (_: Exception) {
                 Toast.makeText(requireContext(), "No se pudo abrir Análisis", Toast.LENGTH_SHORT).show()

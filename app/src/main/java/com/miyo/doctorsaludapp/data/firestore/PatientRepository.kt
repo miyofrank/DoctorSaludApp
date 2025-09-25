@@ -1,8 +1,8 @@
 package com.miyo.doctorsaludapp.data.firestore
 
+import com.google.firebase.Firebase
 import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.firestore
 import com.miyo.doctorsaludapp.domain.model.Patient
 import kotlinx.coroutines.tasks.await
 

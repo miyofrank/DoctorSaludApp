@@ -1,9 +1,9 @@
 package com.miyo.doctorsaludapp.data.storage
 
 import android.net.Uri
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.Firebase
 import com.google.firebase.storage.StorageMetadata
-import com.google.firebase.storage.ktx.storage
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.tasks.await
 
 class ImageUploader {

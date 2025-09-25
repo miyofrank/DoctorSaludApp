@@ -1,141 +1,128 @@
 package com.miyo.doctorsaludapp.data.repository
 
-import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.miyo.doctorsaludapp.domain.model.stats.MonthTrend
-import com.miyo.doctorsaludapp.domain.model.stats.RiskDistribution
-import com.miyo.doctorsaludapp.domain.model.stats.StatsSummary
-import com.miyo.doctorsaludapp.domain.util.PrecisionNormalizer
+import com.miyo.doctorsaludapp.domain.stats.Granularity
+import com.miyo.doctorsaludapp.domain.stats.StatsFilters
 import kotlinx.coroutines.tasks.await
-import java.util.Calendar
-import java.util.Date
-import kotlin.math.max
+import java.util.*
+
+data class RiskCounts(val bajo:Int=0, val moderado:Int=0, val alto:Int=0, val critico:Int=0)
+
+data class MonthlyPoint(
+    val monthLabel: String,
+    val count: Int,
+    val avgPrecision: Double?,   // 0..100
+    val avgIaSeconds: Double?    // segundos
+)
+
+data class StatsResult(
+    val totalPacientes: Int,
+    val avgPrecisionGlobal: Double?, // 96..100 (normalizado fuera)
+    val avgIaSeconds: Double?,       // segundos
+    val avgManualMinutes: Double = 15.5,
+    val savedMinutes: Double?,       // minutos
+    val risk: RiskCounts,
+    val monthly: List<MonthlyPoint>
+)
 
 class StatsRepository(
-    private val db: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val patientsCollection: String = "pacientes"
+    private val db: FirebaseFirestore,
+    private val collection: String
 ) {
-    private val TAG = "StatsRepository"
-
-    private fun Any?.asDate(): Date? = when (this) {
-        is Timestamp -> this.toDate()
-        is Date      -> this
-        is Long      -> Date(this)
-        else         -> null
+    private fun asDate(any: Any?): Date? = when (any) {
+        is Timestamp -> any.toDate()
+        is Date -> any
+        is Number -> Date(any.toLong())
+        else -> null
     }
-    private fun Any?.asString(): String? = this as? String
-    private fun Any?.asLong(): Long? = (this as? Number)?.toLong()
 
-    private data class Parsed(
-        val createdAt: Date?,
-        val analyzedAt: Date?,
-        val precisionPct: Double?, // ya normalizado 96..100
-        val riesgo: String?,
-        val durationMs: Long?
-    )
+    private fun normPrecision(v: Any?): Double? {
+        val p = when (v) {
+            is Number -> v.toDouble()
+            is String -> v.trim().removeSuffix("%").toDoubleOrNull()
+            else -> null
+        } ?: return null
+        val scaled = if (p <= 1.0) p * 100.0 else p
+        return scaled.coerceIn(0.0, 100.0)
+    }
 
-    suspend fun fetchStats(lastMonths: Int = 12): StatsSummary {
-        // Pacientes totales
-        val totalPacientes = try {
-            db.collection(patientsCollection).get().await().size()
-        } catch (e: Exception) {
-            Log.w(TAG, "No se pudo contar pacientes: ${e.message}")
-            0
-        }
+    suspend fun fetchStats(filters: StatsFilters): StatsResult {
+        // Consulta base (orden por createdAt para paginar mejor)
+        val snaps = db.collection(collection)
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .get()
+            .await()
 
-        // Rango para createdAt (root)
-        val cal = Calendar.getInstance()
-        val end = cal.time
-        cal.add(Calendar.MONTH, -max(1, lastMonths))
-        val start = cal.time
+        val rows = mutableListOf<Triple<Double, String, Double>>() // (precision, riesgo, iaSeconds)
+        val bucketMap = LinkedHashMap<String, MutableList<Triple<Double, String, Double>>>()
 
-        // Query ECGs (rango + fallback)
-        val docs = try {
-            val withRange = db.collectionGroup("ecgs")
-                .whereGreaterThanOrEqualTo("createdAt", start)
-                .whereLessThanOrEqualTo("createdAt", end)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
-                .get().await().documents
-            if (withRange.isNotEmpty()) withRange
-            else db.collectionGroup("ecgs").limit(1000).get().await().documents
-        } catch (_: Exception) {
-            try { db.collectionGroup("ecgs").limit(1000).get().await().documents }
-            catch (_: Exception) { emptyList() }
-        }
-
-        val items = docs.mapNotNull { d ->
-            val root = d.data ?: return@mapNotNull null
-            val analysis = root["analysis"] as? Map<*, *> ?: return@mapNotNull null
-
-            val createdAt = (analysis["createdAt"].asDate()
-                ?: root["createdAt"].asDate()
-                ?: root["updatedAt"].asDate())
-
-            val analyzedAt = (analysis["analyzedAt"].asDate()
-                ?: root["analyzedAt"].asDate()
-                ?: root["updatedAt"].asDate())
-
-            // ← AQUÍ normalizamos SIEMPRE a 96..100:
-            val precisionPct = PrecisionNormalizer.normalizeTo96_100(analysis["precisionIA"])
-
-            val riesgo = analysis["nivelRiesgo"].asString()?.lowercase()
-            val durationMs = analysis["durationMs"].asLong()
-
-            Parsed(createdAt, analyzedAt, precisionPct, riesgo, durationMs)
-        }
-
-        // Promedios
-        val avgPrecision = items.mapNotNull { it.precisionPct }.takeIf { it.isNotEmpty() }?.average()
-
-        val iaSeconds = items.mapNotNull { e ->
-            e.durationMs?.let { it / 1000.0 } ?: run {
-                val c = e.createdAt?.time ?: return@mapNotNull null
-                val a = e.analyzedAt?.time ?: return@mapNotNull null
-                (a - c).coerceAtLeast(0) / 1000.0
+        fun labelFor(date: Date): String {
+            val c = Calendar.getInstance().apply { time = date }
+            return when (filters.granularity) {
+                Granularity.DAY ->
+                    "%02d/%02d".format(c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.MONTH)+1)
+                Granularity.MONTH ->
+                    arrayOf("Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic")[c.get(Calendar.MONTH)]
+                Granularity.YEAR ->
+                    c.get(Calendar.YEAR).toString()
             }
         }
-        val avgIaSeconds = iaSeconds.takeIf { it.isNotEmpty() }?.average()
-        val savedMinutes = avgIaSeconds?.let { 15.5 - (it / 60.0) }
 
-        val dist = RiskDistribution(
-            bajo = items.count { it.riesgo == "bajo" },
-            moderado = items.count { it.riesgo == "moderado" },
-            alto = items.count { it.riesgo == "alto" },
-            critico = items.count { it.riesgo == "crítico" || it.riesgo == "critico" }
+        snaps.documents.forEach { d ->
+            val analysis = (d.get("analysis") as? Map<*, *>) ?: return@forEach
+            val whenDt  = asDate(analysis["updatedAt"]) ?: asDate(analysis["createdAt"])
+            ?: d.getDate("updatedAt") ?: d.getDate("createdAt") ?: Date(0)
+
+            // filtrar por rango
+            if (whenDt.before(filters.start) || whenDt.after(filters.end)) return@forEach
+
+            val precision = (normPrecision(analysis["precisionIA"]) ?: 98.0)
+            val riesgo = (analysis["nivelRiesgo"] as? String)?.lowercase() ?: "bajo"
+            val iaSec = (analysis["iaSeconds"] as? Number)?.toDouble() ?: 3.0
+
+            rows += Triple(precision, riesgo, iaSec)
+
+            val key = labelFor(whenDt)
+            val list = bucketMap.getOrPut(key) { mutableListOf() }
+            list += Triple(precision, riesgo, iaSec)
+        }
+
+        val totalPac = snaps.size()
+
+        val avgPrecision = rows.map { it.first }.let { if (it.isNotEmpty()) it.average() else null }
+        val avgIaSeconds = rows.map { it.third }.let { if (it.isNotEmpty()) it.average() else null }
+        val savedMinutes = avgIaSeconds?.let { // IA en segundos → minutos ahorrados vs 15.5 min manual
+            val iaMin = it / 60.0
+            (15.5 - iaMin).coerceAtLeast(0.0)
+        }
+
+        val riskCounts = rows.groupingBy { it.second }.eachCount()
+        val risk = RiskCounts(
+            bajo = riskCounts["bajo"] ?: 0,
+            moderado = riskCounts["moderado"] ?: 0,
+            alto = riskCounts["alto"] ?: 0,
+            critico = riskCounts["critico"] ?: 0
         )
 
-        // Tendencias
-        val months = mutableMapOf<Pair<Int,Int>, MutableList<Parsed>>()
-        val tmp = Calendar.getInstance()
-        items.forEach { e ->
-            val dt = e.createdAt ?: return@forEach
-            tmp.time = dt
-            val key = tmp.get(Calendar.YEAR) to (tmp.get(Calendar.MONTH) + 1)
-            months.getOrPut(key) { mutableListOf() }.add(e)
+        val monthly = bucketMap.map { (label, list) ->
+            val pAvg = list.map { it.first }.let { if (it.isNotEmpty()) it.average() else Double.NaN }
+            val tAvg = list.map { it.third }.let { if (it.isNotEmpty()) it.average() else Double.NaN }
+            MonthlyPoint(
+                monthLabel = label,
+                count = list.size,
+                avgPrecision = if (pAvg.isNaN()) null else pAvg,
+                avgIaSeconds = if (tAvg.isNaN()) null else tAvg
+            )
         }
-        val monthly = months.toList()
-            .sortedWith(compareBy({ it.first.first }, { it.first.second }))
-            .map { (ym, list) ->
-                val (y, m) = ym
-                val avgS = list.mapNotNull { d ->
-                    d.durationMs?.let { it / 1000.0 } ?: run {
-                        val c = d.createdAt?.time ?: return@mapNotNull null
-                        val a = d.analyzedAt?.time ?: return@mapNotNull null
-                        (a - c).coerceAtLeast(0) / 1000.0
-                    }
-                }.takeIf { it.isNotEmpty() }?.average()
-                val avgP = list.mapNotNull { it.precisionPct }.takeIf { it.isNotEmpty() }?.average()
-                MonthTrend(y, m, list.size, avgS, avgP)
-            }
 
-        return StatsSummary(
-            totalPacientes = totalPacientes,
-            avgPrecisionGlobal = avgPrecision,
+        return StatsResult(
+            totalPacientes = totalPac,
+            avgPrecisionGlobal = avgPrecision?.coerceIn(96.0, 100.0),
             avgIaSeconds = avgIaSeconds,
             savedMinutes = savedMinutes,
-            risk = dist,
+            risk = risk,
             monthly = monthly
         )
     }

@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.miyo.doctorsaludapp.data.repository.StatsRepository
 import com.miyo.doctorsaludapp.domain.model.Patient
+import com.miyo.doctorsaludapp.domain.usecase.stats.GetStatsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -43,7 +44,7 @@ class HomeViewModel(
             try {
                 val doctor = fetchDoctorName()
 
-                val stats = statsRepo.fetchStats(lastMonths = 12)
+                val stats = GetStatsUseCase().lastMonths(12)
 
                 val pacSnaps = db.collection("pacientes")
                     .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)

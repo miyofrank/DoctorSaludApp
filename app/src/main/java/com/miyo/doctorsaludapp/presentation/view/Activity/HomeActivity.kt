@@ -2,11 +2,8 @@ package com.miyo.doctorsaludapp.presentation.view.Activity
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.get
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.miyo.doctorsaludapp.R
 import com.miyo.doctorsaludapp.databinding.ActivityHomeBinding
 import com.miyo.doctorsaludapp.presentation.view.Adapter.ViewPagerAdapter
@@ -67,7 +64,7 @@ class HomeActivity : AppCompatActivity() {
         })
 
         binding.btmStadistica.setOnClickListener {
-            val intent = Intent(this, com.miyo.doctorsaludapp.presentation.view.activity.StatsActivity::class.java)
+            val intent = Intent(this, StatsActivity::class.java)
             startActivity(intent)
         }
     }

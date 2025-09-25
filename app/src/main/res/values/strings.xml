@@ -20,5 +20,26 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <string name="estadisticas">Estadísticas</string>
+    <string name="filtros">Filtros</string>
+    <string name="selecciona_periodo">Selecciona periodo</string>
+    <string name="granularidad">Granularidad</string>
+    <string name="aplicar_filtros">Aplicar filtros</string>
+    <string name="resumen">Resumen</string>
+    <string name="total_pacientes">Total pacientes</string>
+    <string name="precision_ia">Precisión IA</string>
+    <string name="tiempo_ia">Tiempo IA</string>
+    <string name="tiempo_manual">Tiempo manual</string>
+    <string name="tiempo_ahorrado">Tiempo ahorrado</string>
+    <string name="distribucion_riesgo">Distribución de riesgo</string>
+    <string name="tendencia_por_periodo">Tendencia por período</string>
+    <string name="indicador_precision">Indicador: Precisión IA</string>
+    <string name="indicador_tiempo_ia">Indicador: Tiempo con IA</string>
+    <string name="indicador_riesgo">Indicador: Distribución de riesgo</string>
+    <string name="indicador_tiempo_manual">Indicador: Tiempo manual</string>
+    <string name="error_cargar_datos">No se pudieron cargar los datos.</string>
+    <string name="sin_datos_periodo">Sin ECGs registrados en el período.</string>
+
+
 
 </resources>

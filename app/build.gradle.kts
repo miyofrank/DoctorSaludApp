@@ -4,11 +4,15 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    alias(libs.plugins.google.firebase.appdistribution)
 }
+
 
 android {
     namespace = "com.miyo.doctorsaludapp"
     compileSdk = 36
+
+
 
     defaultConfig({
         applicationId = "com.miyo.doctorsaludapp"
@@ -90,6 +94,8 @@ dependencies {
     //DaggerHilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.annotation)
+    implementation(libs.firebase.appcheck.debug)
+    implementation(libs.firebase.appcheck.playintegrity)
     kapt(libs.hilt.android.compiler)
     //Timber
     implementation (libs.timber)
@@ -121,5 +127,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation ("com.google.firebase:firebase-appcheck-playintegrity")
+    debugImplementation ("com.google.firebase:firebase-appcheck-debug")
 }
 apply(plugin = "dagger.hilt.android.plugin")

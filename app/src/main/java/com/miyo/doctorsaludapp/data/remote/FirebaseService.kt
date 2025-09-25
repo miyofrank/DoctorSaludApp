@@ -1,12 +1,12 @@
 package com.miyo.doctorsaludapp.data.remote
 
+import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthResult
 import kotlinx.coroutines.tasks.await
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.firestore
 
 class FirebaseService {
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()

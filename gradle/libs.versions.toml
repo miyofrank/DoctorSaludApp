@@ -27,6 +27,9 @@ annotation = "1.8.0"
 firebaseStorage = "21.0.0"
 kspVersion = "1.9.22-1.0.17"
 safeargsVersion = "2.7.7"
+googleFirebaseAppdistribution = "5.1.1"
+firebaseAppcheckDebug = "19.0.0"
+firebaseAppcheckPlayintegrity = "19.0.0"
 [libraries]
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version = "1.10.1" }
 androidx-activity-ktx-v172 = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
@@ -63,6 +66,8 @@ firebase-database = { group = "com.google.firebase", name = "firebase-database",
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 androidx-annotation = { group = "androidx.annotation", name = "annotation", version = "1.9.1" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
+firebase-appcheck-debug = { group = "com.google.firebase", name = "firebase-appcheck-debug", version.ref = "firebaseAppcheckDebug" }
+firebase-appcheck-playintegrity = { group = "com.google.firebase", name = "firebase-appcheck-playintegrity", version.ref = "firebaseAppcheckPlayintegrity" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -75,3 +80,4 @@ kotlin-kap = {id="org.jetbrains.kotlin.kapt",version.ref = "kotlin" }
 ksp={id = "com.google.devtools.ksp", version.ref = "kspVersion"}
 #Navegación Segura
 navigation-safeargs={id="androidx.navigation.safeargs.kotlin",version.ref="safeargsVersion"}
+google-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version.ref = "googleFirebaseAppdistribution" }

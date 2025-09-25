@@ -1,9 +1,10 @@
 package com.miyo.doctorsaludapp.domain.usecase
 
 import android.content.Context
+import com.google.firebase.Firebase
 import com.google.firebase.firestore.FieldValue
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.tasks.await
 import com.miyo.doctorsaludapp.data.ai.GeminiAnalyzer
 import com.miyo.doctorsaludapp.data.firestore.PatientRepository

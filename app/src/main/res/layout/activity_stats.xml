@@ -2,9 +2,9 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white">
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
@@ -22,230 +22,282 @@
 
         <LinearLayout
             android:id="@+id/content"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
+            <!-- Filtros -->
             <TextView
-                android:id="@+id/tvTitleHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="Estadísticas"
                 android:textStyle="bold"
                 android:textSize="22sp"
-                android:textColor="@color/black"/>
+                android:textColor="@color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
             <TextView
-                android:id="@+id/tvSubtitleHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
                 android:text="Indicadores de rendimiento y eficiencia"
-                android:textColor="@color/black_60"/>
+                android:textColor="@color/black_60"
+                android:layout_marginTop="2dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
-            <!-- Filtros -->
-            <include
-                android:id="@+id/filters"
-                layout="@layout/include_filter_bar"/>
+            <LinearLayout
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:startIconDrawable="@drawable/ic_calendar_24">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etStart"
+                        android:focusable="false"
+                        android:hint="Desde"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Space android:layout_width="12dp" android:layout_height="1dp"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:startIconDrawable="@drawable/ic_calendar_24">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEnd"
+                        android:focusable="false"
+                        android:hint="Hasta"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:endIconMode="dropdown_menu">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/acGranularity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Granularidad"
+                    android:inputType="none" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnApply"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.Button"
+                android:text="Aplicar filtros"
                 android:layout_marginTop="8dp"
-                android:text="Aplicar filtros"/>
-
-            <!-- Accesos a cada indicador -->
-            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:backgroundTint="@color/primaryBlue"
+                android:textColor="@android:color/white"/>
+
+            <!-- Accesos a indicadores (opcionales) -->
+            <LinearLayout
+                android:layout_marginTop="12dp"
                 android:orientation="horizontal"
-                android:layout_marginTop="12dp">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnPrecision"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:text="Precisión"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Precisión"/>
+                    android:layout_weight="1"/>
 
-                <Space android:layout_width="8dp" android:layout_height="1dp"/>
+                <Space android:layout_width="6dp" android:layout_height="1dp"/>
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnTiempo"
+                    android:id="@+id/btnTiempoIa"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:text="Tiempo IA"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Tiempo IA"/>
+                    android:layout_weight="1"/>
 
-                <Space android:layout_width="8dp" android:layout_height="1dp"/>
+                <Space android:layout_width="6dp" android:layout_height="1dp"/>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRiesgo"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:text="Riesgo"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Riesgo"/>
+                    android:layout_weight="1"/>
 
-                <Space android:layout_width="8dp" android:layout_height="1dp"/>
+                <Space android:layout_width="6dp" android:layout_height="1dp"/>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnPreop"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:text="Preop"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Preop"/>
+                    android:layout_weight="1"/>
             </LinearLayout>
 
             <!-- KPIs -->
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
                     app:cardCornerRadius="16dp"
                     app:cardUseCompatPadding="true">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:padding="16dp"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
 
                         <TextView
                             android:id="@+id/tvTotalPatients"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
+                            android:textSize="26sp"
                             android:textStyle="bold"
-                            android:textSize="22sp"/>
+                            android:textColor="@color/black"
+                            android:text="0"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
                             android:text="Pacientes totales"
-                            android:textColor="@color/black_60"/>
+                            android:textColor="@color/black_60"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
+
+                <Space android:layout_width="12dp" android:layout_height="1dp"/>
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp"
                     app:cardCornerRadius="16dp"
                     app:cardUseCompatPadding="true">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:padding="16dp"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
 
                         <TextView
                             android:id="@+id/tvIaPrecision"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="—"
+                            android:textSize="26sp"
                             android:textStyle="bold"
-                            android:textSize="22sp"/>
+                            android:textColor="@color/black"
+                            android:text="—"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
                             android:text="Precisión de IA"
-                            android:textColor="@color/black_60"/>
+                            android:textColor="@color/black_60"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-            <!-- Distribución de riesgo -->
+            <!-- Tiempo -->
             <com.google.android.material.card.MaterialCardView
+                android:layout_marginTop="12dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 app:cardCornerRadius="16dp"
                 app:cardUseCompatPadding="true">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:padding="16dp"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
                     <TextView
+                        android:text="Tiempo promedio de análisis"
+                        android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Distribución de riesgo"
-                        android:textStyle="bold"/>
+                        android:layout_height="wrap_content"/>
 
-                    <com.github.mikephil.charting.charts.BarChart
-                        android:id="@+id/riskChart"
+                    <LinearLayout
+                        android:layout_marginTop="6dp"
+                        android:orientation="vertical"
                         android:layout_width="match_parent"
-                        android:layout_height="220dp"
-                        android:layout_marginTop="8dp"/>
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/tvIaTime"
+                            android:text="—"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                        <TextView
+                            android:id="@+id/tvManualTime"
+                            android:text="—"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                        <TextView
+                            android:id="@+id/tvSavedTime"
+                            android:text="—"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Tendencia: precisión mensual -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+            <!-- Riesgo -->
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/riskChart"
                 android:layout_marginTop="12dp"
-                app:cardCornerRadius="16dp"
-                app:cardUseCompatPadding="true">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tendencia de precisión"
-                        android:textStyle="bold"/>
-
-                    <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/lineChart"
-                        android:layout_width="match_parent"
-                        android:layout_height="220dp"
-                        android:layout_marginTop="8dp"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <Space
                 android:layout_width="match_parent"
-                android:layout_height="24dp"/>
+                android:layout_height="220dp"/>
+
+            <!-- Tendencia mensual -->
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/lineChart"
+                android:layout_marginTop="12dp"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"/>
+
+            <!-- Lista mensual -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvMonthly"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
     </ScrollView>
 
     <ProgressBar
         android:id="@+id/progress"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        style="@style/Widget.MaterialComponents.CircularProgressIndicator"
         android:layout_gravity="center"
-        android:visibility="gone"/>
-
-    <TextView
-        android:id="@+id/errorView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Ocurrió un error cargando las estadísticas."
-        android:layout_gravity="center"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:layout_width="48dp"
+        android:layout_height="48dp"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

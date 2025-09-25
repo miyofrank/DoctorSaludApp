@@ -57,10 +57,10 @@
             android:name=".presentation.view.Activity.RegisterActivity"
             android:exported="false" />
         <activity android:name=".presentation.view.Activity.StatsActivity" />
-
-
-
-
+        <activity android:name=".presentation.view.activity.IndicatorPrecisionActivity" />
+        <activity android:name=".presentation.view.activity.IndicatorTiempoInterpretacionActivity" />
+        <activity android:name=".presentation.view.activity.IndicatorRiesgoActivity" />
+        <activity android:name=".presentation.view.activity.IndicatorEvaluacionPreopActivity" />
         <activity
             android:name=".presentation.view.Activity.LoginActivity"
             android:exported="true">

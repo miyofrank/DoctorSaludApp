@@ -2,11 +2,11 @@ package com.miyo.doctorsaludapp.presentation.view.activity
 
 import android.os.Bundle
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.activity.ComponentActivity
-import androidx.activity.viewModels
 import androidx.core.view.isVisible
+import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -17,95 +17,78 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.miyo.doctorsaludapp.databinding.ActivityIndicatorTiempoInterpretacionBinding
-import com.miyo.doctorsaludapp.domain.stats.Granularity
-import com.miyo.doctorsaludapp.domain.stats.StatsFilters
+import com.miyo.doctorsaludapp.domain.model.stats.StatsFilters
 import com.miyo.doctorsaludapp.presentation.viewmodel.StatsViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class IndicatorTiempoInterpretacionActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityIndicatorTiempoInterpretacionBinding
     private val vm: StatsViewModel by viewModels()
 
-    private val fmt by lazy { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
-    private var startDate: Date? = null
-    private var endDate: Date? = null
+    private var selectedStart: Date? = null
+    private var selectedEnd: Date? = null
+    private var selectedGran = "month"
+    private val df = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         b = ActivityIndicatorTiempoInterpretacionBinding.inflate(layoutInflater)
         setContentView(b.root)
 
-        b.toolbar.setNavigationOnClickListener { finish() }
-
-        setupFilters()
-        setupChart()
+        setupUi()
         observe()
-
-        val cal = Calendar.getInstance()
-        val end = cal.time
-        cal.add(Calendar.MONTH, -6)
-        val start = cal.time
-        setDateRangeUi(start, end)
-        vm.applyFilters(StatsFilters(start, end, Granularity.MONTH))
+        vm.load()
     }
 
-    private fun setupChart() = with(b.lineChart) {
-        description = Description().apply { text = "" }
-        axisLeft.setDrawGridLines(false)
-        axisRight.isEnabled = false
-        xAxis.setDrawGridLines(false)
-        legend.isEnabled = false
-    }
+    private fun setupUi() = with(b) {
+        toolbar.setNavigationOnClickListener { finish() }
+        toolbar.title = "Tiempo de interpretación (IA)"
 
-    private fun setupFilters() = with(b.filters) {
-        val grans = listOf("Día","Mes","Año")
-        acGranularity.setAdapter(
-            ArrayAdapter(this@IndicatorTiempoInterpretacionActivity, android.R.layout.simple_list_item_1, grans)
+        chart.description = Description().apply { text = "" }
+        chart.axisLeft.setDrawGridLines(false)
+        chart.axisRight.isEnabled = false
+        chart.xAxis.setDrawGridLines(false)
+        chart.legend.isEnabled = false
+
+        etStart.setOnClickListener { pickDate(true) }
+        etEnd.setOnClickListener { pickDate(false) }
+
+        val items = listOf("Día", "Mes", "Año")
+        (acGranularity as? AutoCompleteTextView)?.setAdapter(
+            ArrayAdapter(this@IndicatorTiempoInterpretacionActivity, android.R.layout.simple_list_item_1, items)
         )
         acGranularity.setText("Mes", false)
-
-        val openPicker = {
-            val picker = MaterialDatePicker.Builder.dateRangePicker()
-                .setTitleText("Selecciona período")
-                .build()
-            picker.addOnPositiveButtonClickListener {
-                val s = it.first ?: return@addOnPositiveButtonClickListener
-                val e = it.second ?: return@addOnPositiveButtonClickListener
-                setDateRangeUi(Date(s), Date(e))
-            }
-            picker.show(supportFragmentManager, "tiempo_range")
+        acGranularity.setOnItemClickListener { _, _, pos, _ ->
+            selectedGran = when (pos) { 0 -> "day"; 2 -> "year"; else -> "month" }
         }
-        etStartDate.setOnClickListener { openPicker() }
-        etEndDate.setOnClickListener { openPicker() }
 
-        b.btnApply.setOnClickListener { applyFiltersFromUi() }
+        btnApply.setOnClickListener { applyFilters() }
     }
 
-    private fun setDateRangeUi(start: Date, end: Date) = with(b.filters) {
-        startDate = start
-        endDate = end
-        etStartDate.setText(fmt.format(start))
-        etEndDate.setText(fmt.format(end))
+    private fun pickDate(isStart: Boolean) {
+        val picker = MaterialDatePicker.Builder.datePicker()
+            .setTitleText(if (isStart) "Desde" else "Hasta")
+            .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+            .build()
+        picker.addOnPositiveButtonClickListener { millis ->
+            val d = Date(millis)
+            if (isStart) { selectedStart = d; b.etStart.setText(df.format(d)) }
+            else { selectedEnd = d; b.etEnd.setText(df.format(d)) }
+        }
+        picker.show(supportFragmentManager, if (isStart) "start_timeia" else "end_timeia")
     }
 
-    private fun granularityFromText(t: String): Granularity =
-        when (t.lowercase(Locale.getDefault())) {
-            "día","dia" -> Granularity.DAY
-            "año" -> Granularity.YEAR
-            else -> Granularity.MONTH
-        }
-
-    private fun applyFiltersFromUi() {
-        val s = startDate; val e = endDate
-        if (s == null || e == null) {
-            Toast.makeText(this, "Selecciona el rango", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val gran = granularityFromText(b.filters.acGranularity.text.toString())
-        vm.applyFilters(StatsFilters(s, e, gran))
+    private fun applyFilters() {
+        val f = StatsFilters(
+            start = selectedStart ?: vm.state.value.filters.start,
+            end = selectedEnd ?: vm.state.value.filters.end,
+            granularity = selectedGran
+        )
+        vm.setFilters(f); vm.load(f)
     }
 
     private fun observe() {
@@ -113,20 +96,20 @@ class IndicatorTiempoInterpretacionActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 vm.state.collect { s ->
                     b.progress.isVisible = s.loading
-                    b.content.isVisible = !s.loading && s.data != null
-                    s.data?.let { d ->
-                        // KPI: promedio segundos IA
-                        val iaS = d.avgIaSeconds ?: 0.0
-                        b.tvKpi.text = String.format(Locale.getDefault(), "%.1f s", iaS)
+                    b.content.isVisible = !s.loading
+                    if (s.error != null) Toast.makeText(this@IndicatorTiempoInterpretacionActivity, s.error, Toast.LENGTH_LONG).show()
 
-                        val labels = d.monthly.map { it.monthLabel }
-                        val entries = d.monthly.mapIndexed { i, m ->
-                            Entry(i.toFloat(), (m.avgIaSeconds ?: 0.0).toFloat())
-                        }
+                    s.data?.let { data ->
+                        val iaS = data.avgIaSeconds ?: 0.0
+                        b.tvKpi.text = String.format(Locale.getDefault(), "%.1fs", iaS)
+                        b.tvSubtitle.text = "Tiempo promedio de IA (global)"
+
+                        val labels = data.monthly.map { it.monthLabel }
+                        val entries = data.monthly.mapIndexed { i, m -> Entry(i.toFloat(), (m.avgIaSeconds ?: 0.0).toFloat()) }
                         val set = LineDataSet(entries, "").apply { setDrawCircles(true) }
-                        b.lineChart.data = LineData(set)
-                        b.lineChart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
-                        b.lineChart.invalidate()
+                        b.chart.data = LineData(set)
+                        b.chart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
+                        b.chart.invalidate()
                     }
                 }
             }

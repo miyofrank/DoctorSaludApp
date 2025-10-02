@@ -37,4 +37,6 @@ class DoctorSalud : Application() {
             Log.i("AppCheck", "PlayIntegrityAppCheckProvider instalado")
         }
     }
+
+
 }

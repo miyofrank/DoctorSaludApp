@@ -96,6 +96,9 @@ dependencies {
     implementation(libs.androidx.annotation)
     implementation(libs.firebase.appcheck.debug)
     implementation(libs.firebase.appcheck.playintegrity)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
     kapt(libs.hilt.android.compiler)
     //Timber
     implementation (libs.timber)

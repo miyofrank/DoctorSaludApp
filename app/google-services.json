@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "993658549778",
+    "firebase_url": "https://doctorsalud-b4711-default-rtdb.firebaseio.com",
     "project_id": "doctorsalud-b4711",
     "storage_bucket": "doctorsalud-b4711.appspot.com"
   },
@@ -19,6 +20,14 @@
           "android_info": {
             "package_name": "com.miyo.doctorsaludapp",
             "certificate_hash": "8368aafdcce308d3b4747cf0f5d4fa9b981b5f52"
+          }
+        },
+        {
+          "client_id": "993658549778-ovtabkbm0gmpt0ehte24na3i9e9engms.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.miyo.doctorsaludapp",
+            "certificate_hash": "c540dda4f196e56beafcacaff0f0432f5a0253e2"
           }
         },
         {

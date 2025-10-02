@@ -44,10 +44,10 @@ class HomeViewModel(
                 // Nombre del doctor
                 val uid = auth.currentUser?.uid
                 val doctor = if (uid != null) {
-                    val snap = db.collection("users").document(uid).get().await()
+                    val snap = db.collection("usuarios").document(uid).get().await()
                     snap.getString("displayName")
-                        ?: snap.getString("name")
-                        ?: snap.getString("nombre")
+                        ?: snap.getString("apellidos")
+                        ?: snap.getString("nombres")
                         ?: "Doctor"
                 } else "Doctor"
 

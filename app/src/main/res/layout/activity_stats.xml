@@ -109,47 +109,70 @@
             <!-- Accesos a indicadores (opcionales) -->
             <LinearLayout
                 android:layout_marginTop="12dp"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                >
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnPrecision"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:text="Precisión"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:width="1dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_height="wrap_content">
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPrecision"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:text="Número EGC"
+                        android:layout_width="150dp"
+                        android:layout_marginTop="8dp"
+                        android:width="1dp"
+                        android:layout_height="wrap_content"
+                        />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnTiempoIa"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:text="Tiempo IA"
+                        android:layout_marginTop="8dp"
+                        android:layout_width="150dp"
+                        android:width="1dp"
+                        android:layout_height="wrap_content"
+                        />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"/>
+                    android:layout_marginLeft="20dp"
+                    android:width="1dp"
+                    >
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnRiesgo"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:text="Riesgo"
+                        android:width="1dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_width="150dp"
+                        android:layout_height="wrap_content"
+                        />
 
-                <Space android:layout_width="6dp" android:layout_height="1dp"/>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnTiempoIa"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:text="Tiempo IA"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"/>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPreop"
+                        android:width="1dp"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:text="Tiempo registrado"
+                        android:layout_marginTop="8dp"
+                        android:layout_width="150dp"
+                        android:layout_height="wrap_content"
+                        />
+                </LinearLayout>
 
-                <Space android:layout_width="6dp" android:layout_height="1dp"/>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnRiesgo"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:text="Riesgo"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"/>
 
-                <Space android:layout_width="6dp" android:layout_height="1dp"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnPreop"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:text="Preop"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"/>
             </LinearLayout>
 
             <!-- KPIs -->

@@ -46,7 +46,7 @@ class IndicatorPrecisionActivity : AppCompatActivity() {
 
     private fun setupUi() = with(b) {
         toolbar.setNavigationOnClickListener { finish() }
-        toolbar.title = "Precisión de IA"
+        toolbar.title = "Número EGC"
 
         chart.description = Description().apply { text = "" }
         chart.axisLeft.setDrawGridLines(false)
@@ -103,7 +103,7 @@ class IndicatorPrecisionActivity : AppCompatActivity() {
 
                     s.data?.let { data ->
                         b.tvKpi.text = data.avgPrecisionGlobal?.let { String.format(Locale.getDefault(), "%.1f%%", it) } ?: "—"
-                        b.tvSubtitle.text = "Precisión promedio del período"
+                        b.tvSubtitle.text = "Número EGC promedio del período"
 
                         val labels = data.monthly.map { it.monthLabel }
                         val entries = data.monthly.mapIndexed { i, m -> Entry(i.toFloat(), (m.avgPrecision ?: 0.0).toFloat()) }

@@ -2,7 +2,6 @@ package com.miyo.doctorsaludapp.data.ai
 
 import android.content.Context
 import com.google.ai.client.generativeai.GenerativeModel
-import com.miyo.doctorsaludapp.BuildConfig
 
 object GeminiClient {
 

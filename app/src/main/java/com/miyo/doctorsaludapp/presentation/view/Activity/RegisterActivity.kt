@@ -1,8 +1,12 @@
 package com.miyo.doctorsaludapp.presentation.view.Activity
 
 import android.os.Bundle
+import android.view.Gravity
+import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.miyo.doctorsaludapp.R
@@ -19,9 +23,69 @@ class RegisterActivity : AppCompatActivity() {
     private val auth by lazy { FirebaseAuth.getInstance() }
     private val userRepo by lazy { FirestoreUserRepository(FirebaseFirestore.getInstance()) }
 
+    // --- Estado del loader ---
+    private var loadingDialog: AlertDialog? = null
+    private var loadingMessageView: TextView? = null
+
+    // Utilidad dp -> px
+    private fun Int.dp(): Int = (this * resources.displayMetrics.density).toInt()
+
+    // Modal de carga reutilizable (sin XML extra)
+    private fun showLoading(message: String = "Procesando...") {
+        if (loadingDialog?.isShowing == true) {
+            loadingMessageView?.text = message
+            return
+        }
+
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(24.dp(), 24.dp(), 24.dp(), 24.dp())
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            gravity = Gravity.CENTER_HORIZONTAL
+        }
+
+        val progress = ProgressBar(this).apply {
+            isIndeterminate = true
+            val size = 48.dp()
+            layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+            }
+        }
+
+        loadingMessageView = TextView(this).apply {
+            text = message
+            setPadding(0, 16.dp(), 0, 0)
+            gravity = Gravity.CENTER_HORIZONTAL
+        }
+
+        container.addView(progress)
+        container.addView(loadingMessageView)
+
+        loadingDialog = MaterialAlertDialogBuilder(this)
+            .setView(container)
+            .setCancelable(false)
+            .create().also { dialog ->
+                dialog.setCanceledOnTouchOutside(false)
+                dialog.show()
+            }
+    }
+
+    private fun hideLoading() {
+        try {
+            loadingDialog?.dismiss()
+        } catch (_: Exception) {
+            // no-op
+        }
+        loadingDialog = null
+        loadingMessageView = null
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Usa el nombre real de tu layout aquí (ajústalo si lo tuyo no es activity_register)
+        // Ajusta el layout si el tuyo tiene otro nombre
         setContentView(R.layout.activity_register)
 
         val emailEt: EditText        = findViewById(R.id.emailEditText)
@@ -43,13 +107,18 @@ class RegisterActivity : AppCompatActivity() {
             val coleg = colegEt.text.toString().trim()
 
             if (email.isEmpty() || pass.length < 6 || nombres.isEmpty() || apellidos.isEmpty()) {
-                Toast.makeText(this, "Completa email/contraseña (≥6) y nombre/apellidos", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this,
+                    "Completa email/contraseña (≥6) y nombre/apellidos",
+                    Toast.LENGTH_LONG
+                ).show()
                 return@setOnClickListener
             }
 
             CoroutineScope(Dispatchers.Main).launch {
+                showLoading("Creando cuenta...")
                 try {
-                    // 1) Crear usuario
+                    // 1) Crear usuario en Auth
                     val res = auth.createUserWithEmailAndPassword(email, pass).await()
                     val uid = res.user?.uid ?: throw IllegalStateException("Sin UID")
 
@@ -74,8 +143,15 @@ class RegisterActivity : AppCompatActivity() {
 
                 } catch (e: Exception) {
                     Toast.makeText(this@RegisterActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                } finally {
+                    hideLoading()
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        hideLoading()
+        super.onDestroy()
     }
 }

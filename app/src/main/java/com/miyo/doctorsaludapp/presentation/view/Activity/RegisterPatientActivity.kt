@@ -4,10 +4,17 @@ import android.app.DatePickerDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.Gravity
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.miyo.doctorsaludapp.R
@@ -42,10 +49,69 @@ class RegisterPatientActivity : AppCompatActivity() {
     private val storageRepo by lazy { FirebaseStorageRepository(storage, contentResolver) }
     private val setPatientUseCase by lazy { SetPatientUseCase(patientRepo) }
 
+    // ---------------------- Modal de carga (programático) ----------------------
+
+    private var loadingDialog: AlertDialog? = null
+    private var loadingMessageView: TextView? = null
+
+    private fun Int.dp(): Int = (this * resources.displayMetrics.density).toInt()
+
+    private fun showLoadingDialog(message: String = "Procesando...") {
+        if (loadingDialog?.isShowing == true) {
+            loadingMessageView?.text = message
+            return
+        }
+        val ctx = this
+
+        val container = LinearLayout(ctx).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(24.dp(), 24.dp(), 24.dp(), 24.dp())
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            gravity = Gravity.CENTER_HORIZONTAL
+        }
+
+        val progress = ProgressBar(ctx).apply {
+            isIndeterminate = true
+            val size = 48.dp()
+            layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+            }
+        }
+
+        loadingMessageView = TextView(ctx).apply {
+            text = message
+            setPadding(0, 16.dp(), 0, 0)
+            gravity = Gravity.CENTER_HORIZONTAL
+        }
+
+        container.addView(progress)
+        container.addView(loadingMessageView)
+
+        loadingDialog = MaterialAlertDialogBuilder(ctx)
+            .setView(container)
+            .setCancelable(false)
+            .create().also { dialog ->
+                dialog.setCanceledOnTouchOutside(false)
+                dialog.show()
+            }
+    }
+
+    private fun hideLoadingDialog() {
+        try { loadingDialog?.dismiss() } catch (_: Exception) {}
+        loadingDialog = null
+        loadingMessageView = null
+    }
+
+    // -------------------------------------------------------------------------
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterPatientBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         patientId = intent.getStringExtra("patient_id")
         if (!patientId.isNullOrEmpty()) {
             title = "Editar paciente"
@@ -57,8 +123,10 @@ class RegisterPatientActivity : AppCompatActivity() {
         setupPickers()
         setupActions()
     }
+
     private fun loadPatientForEdit(id: String) {
         lifecycleScope.launch {
+            showLoadingDialog("Cargando paciente...")
             try {
                 val repo = FirestorePatientRepository(FirebaseFirestore.getInstance(), "pacientes")
                 val getById = com.miyo.doctorsaludapp.domain.usecase.patient.GetPatientByIdUseCase(repo)
@@ -85,21 +153,35 @@ class RegisterPatientActivity : AppCompatActivity() {
                 binding.ddAnestesia.setText(p.tipoAnestesia ?: "", false)
                 binding.ddUrgencia.setText(p.urgencia ?: "", false)
                 binding.etCirujano.setText(p.cirujano ?: "")
-                p.fechaCirugia?.let { binding.etFecha.setText(java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(it)); binding.etFecha.tag = it }
+                p.fechaCirugia?.let {
+                    binding.etFecha.setText(java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(it))
+                    binding.etFecha.tag = it
+                }
 
                 binding.etExamenesTexto.setText(p.examenesTexto ?: "")
                 binding.tvEcgFile.text = if (p.ecgUrl.isNullOrEmpty()) "Sin archivo seleccionado" else "ECG cargado"
                 binding.tvExamenesFiles.text = if (p.examenesArchivos.isNullOrEmpty()) "Sin archivos" else "${p.examenesArchivos!!.size} archivo(s)"
             } catch (e: Exception) {
                 Toast.makeText(this@RegisterPatientActivity, "Error al cargar: ${e.message}", Toast.LENGTH_LONG).show()
+            } finally {
+                hideLoadingDialog()
             }
         }
     }
+
     private fun setupDropdowns() {
-        binding.ddSexo.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, resources.getStringArray(R.array.sexo_options)))
-        binding.ddGrupo.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, resources.getStringArray(R.array.grupo_sanguineo_options)))
-        binding.ddAnestesia.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, resources.getStringArray(R.array.anestesia_options)))
-        binding.ddUrgencia.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, resources.getStringArray(R.array.urgencia_options)))
+        binding.ddSexo.setAdapter(
+            ArrayAdapter(this, android.R.layout.simple_list_item_1, resources.getStringArray(R.array.sexo_options))
+        )
+        binding.ddGrupo.setAdapter(
+            ArrayAdapter(this, android.R.layout.simple_list_item_1, resources.getStringArray(R.array.grupo_sanguineo_options))
+        )
+        binding.ddAnestesia.setAdapter(
+            ArrayAdapter(this, android.R.layout.simple_list_item_1, resources.getStringArray(R.array.anestesia_options))
+        )
+        binding.ddUrgencia.setAdapter(
+            ArrayAdapter(this, android.R.layout.simple_list_item_1, resources.getStringArray(R.array.urgencia_options))
+        )
     }
 
     private fun setupPickers() {
@@ -203,6 +285,7 @@ class RegisterPatientActivity : AppCompatActivity() {
     private fun savePatientWithUploads() {
         val partial = buildPatientPartial() ?: return
         setLoading(true)
+        showLoadingDialog("Guardando paciente...")
 
         lifecycleScope.launch {
             try {
@@ -225,6 +308,7 @@ class RegisterPatientActivity : AppCompatActivity() {
                         )
                     } catch (_: SecurityException) { /* ignore */ }
 
+                    loadingMessageView?.text = "Subiendo ECG…"
                     val name = "ecg_${System.currentTimeMillis()}"
                     val path = "$basePath/ecg/$name"
                     ecgUrl = storageRepo.uploadSingle(uri, path)
@@ -242,10 +326,12 @@ class RegisterPatientActivity : AppCompatActivity() {
                             )
                         } catch (_: SecurityException) { }
                     }
+                    loadingMessageView?.text = "Subiendo exámenes…"
                     storageRepo.uploadMultiple(examenesUris, "$basePath/exams")
                 } else null
 
                 // 3) Completar paciente con URLs y guardar en Firestore (set por ID)
+                loadingMessageView?.text = "Guardando datos…"
                 val patient = partial.copy(
                     id = id,
                     ecgUrl = ecgUrl,
@@ -261,6 +347,8 @@ class RegisterPatientActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Toast.makeText(this@RegisterPatientActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                 setLoading(false)
+            } finally {
+                hideLoadingDialog()
             }
         }
     }
@@ -286,5 +374,10 @@ class RegisterPatientActivity : AppCompatActivity() {
                     if (examenesUris.isEmpty()) "Sin archivos" else "${examenesUris.size} archivo(s) seleccionado(s)"
             }
         }
+    }
+
+    override fun onDestroy() {
+        hideLoadingDialog()
+        super.onDestroy()
     }
 }

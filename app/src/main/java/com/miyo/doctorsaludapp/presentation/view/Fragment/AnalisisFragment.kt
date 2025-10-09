@@ -3,16 +3,23 @@ package com.miyo.doctorsaludapp.presentation.view.Fragment
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams
 import android.widget.ArrayAdapter
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import coil.load
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.miyo.doctorsaludapp.R
@@ -34,7 +41,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.Locale
-import kotlin.random.Random
 
 class AnalisisFragment : Fragment() {
 
@@ -60,7 +66,6 @@ class AnalisisFragment : Fragment() {
     private val saveEcgAnalysisUseCase by lazy { SaveEcgAnalysisUseCase(ecgRepo) }
     private val markEcgAnalysisStartUseCase by lazy { MarkEcgAnalysisStartUseCase(ecgRepo) }
 
-
     private val storageRepo by lazy { FirebaseStorageRepository(storage, requireContext().contentResolver) }
 
     // Pacientes
@@ -82,6 +87,68 @@ class AnalisisFragment : Fragment() {
     }
 
     private var autoAnalisisEnabled = false
+
+    // --------------------------------------------------------------------------------------------
+    // Modal de Carga (programático, bloqueante)
+    // --------------------------------------------------------------------------------------------
+
+    private var loadingDialog: AlertDialog? = null
+    private var loadingMessageView: TextView? = null
+
+    private fun Int.dp(): Int = (this * resources.displayMetrics.density).toInt()
+
+    private fun showBlockingLoading(message: String = "Cargando...") {
+        if (!isAdded) return
+        val ctx = context ?: return
+
+        if (loadingDialog?.isShowing == true) {
+            loadingMessageView?.text = message
+            return
+        }
+
+        val container = LinearLayout(ctx).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(24.dp(), 24.dp(), 24.dp(), 24.dp())
+            layoutParams = LinearLayout.LayoutParams(
+                LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT
+            )
+            gravity = Gravity.CENTER_HORIZONTAL
+        }
+
+        val progress = ProgressBar(ctx).apply {
+            isIndeterminate = true
+            val size = 48.dp()
+            layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+            }
+        }
+
+        loadingMessageView = TextView(ctx).apply {
+            text = message
+            setPadding(0, 16.dp(), 0, 0)
+            gravity = Gravity.CENTER_HORIZONTAL
+        }
+
+        container.addView(progress)
+        container.addView(loadingMessageView)
+
+        loadingDialog = MaterialAlertDialogBuilder(ctx)
+            .setView(container)
+            .setCancelable(false)
+            .create().also { dialog ->
+                dialog.setCanceledOnTouchOutside(false)
+                dialog.show()
+            }
+    }
+
+    private fun hideBlockingLoading() {
+        try {
+            loadingDialog?.dismiss()
+        } catch (_: Exception) { }
+        loadingDialog = null
+        loadingMessageView = null
+    }
 
     // --------------------------------------------------------------------------------------------
 
@@ -148,7 +215,10 @@ class AnalisisFragment : Fragment() {
         boxUpload.alpha = if (boxUpload.isEnabled) 1f else 0.6f
     }
 
-    private fun showLoading(loading: Boolean) = with(binding) { progressBar.isVisible = loading }
+    private fun showLoadingInView(loading: Boolean) = with(binding) {
+        // Si quieres mantener también el progressBar del layout
+        progressBar.isVisible = loading
+    }
 
     private fun showPreviewFromUri(uri: Uri) = with(binding) {
         ivEcgPreview.isVisible = true
@@ -174,7 +244,6 @@ class AnalisisFragment : Fragment() {
         }
     }
 
-
     private fun toDisplay(p: Patient): String {
         val nombre = when {
             !p.nombreCompleto.isNullOrBlank() -> p.nombreCompleto!!
@@ -199,7 +268,6 @@ class AnalisisFragment : Fragment() {
         refreshButtons()
     }
 
-
     // --------------------------------------------------------------------------------------------
     // Subida a Storage + creación/actualización del documento ECG
     // --------------------------------------------------------------------------------------------
@@ -217,7 +285,8 @@ class AnalisisFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 isUploading = true
-                showLoading(true)
+                showLoadingInView(true)
+                showBlockingLoading("Subiendo ECG…")
                 refreshButtons()
                 binding.tvEcgStatus.text = "Subiendo ECG…"
 
@@ -229,7 +298,7 @@ class AnalisisFragment : Fragment() {
                     ecgId = path.substringAfterLast('/'),
                     ecgMime = mime
                 )
-                // 1) Actualiza al paciente (compat con tu app)
+                // 1) Actualiza al paciente
                 setPatientUseCase(p.id!!, updated)
                 selected = updated
 
@@ -260,7 +329,8 @@ class AnalisisFragment : Fragment() {
             } finally {
                 isUploading = false
                 isPicking = false
-                showLoading(false)
+                showLoadingInView(false)
+                hideBlockingLoading()
                 refreshButtons()
             }
         }
@@ -284,6 +354,9 @@ class AnalisisFragment : Fragment() {
         // deshabilitar UI mientras corre
         binding.btnAnalizar.isEnabled = false
         binding.boxUpload.isEnabled = false
+        isAnalyzing = true
+        showLoadingInView(true)
+        showBlockingLoading("Analizando ECG con IA…")
 
         viewLifecycleOwner.lifecycleScope.launch {
             val startNs = System.nanoTime()
@@ -313,18 +386,18 @@ class AnalisisFragment : Fragment() {
                     source = "gemini"
                 )
 
-                // 3) Duración exacta en ms medida en cliente
                 val durationMs = ((System.nanoTime() - startNs) / 1_000_000.0).toLong()
 
-                // 4) GUARDAR resultado + FIN + durationMs
+                // 3) Guardar resultado
                 saveEcgAnalysisUseCase(p.id!!, p.ecgId!!, analysis, durationMs)
 
-                // 5) Actualizar UI
+                // 4) Actualizar UI
                 val iaSec = durationMs / 1000.0
                 binding.tvInterpretacion.text = analysis.interpretacion ?: "—"
                 binding.tvPrecision.text = "Precisión de IA: ${analysis.precisionIA?.let { "%.1f".format(it) } ?: "—"}%"
                 binding.tvRiesgo.text = "Nivel de riesgo: ${analysis.nivelRiesgo ?: "—"}"
-                binding.tvParametros.text = "FC: ${analysis.fc_bpm ?: "—"} bpm   Ritmo: ${analysis.ritmo ?: "—"}   PR: ${analysis.pr_ms ?: "—"} ms   QRS: ${analysis.qrs_ms ?: "—"} ms   QT: ${analysis.qt_ms ?: "—"} ms   QTc: ${analysis.qtc_ms ?: "—"} ms"
+                binding.tvParametros.text =
+                    "FC: ${analysis.fc_bpm ?: "—"} bpm   Ritmo: ${analysis.ritmo ?: "—"}   PR: ${analysis.pr_ms ?: "—"} ms   QRS: ${analysis.qrs_ms ?: "—"} ms   QT: ${analysis.qt_ms ?: "—"} ms   QTc: ${analysis.qtc_ms ?: "—"} ms"
                 binding.tvTiempoIA.text = "Tiempo con IA: ${"%.1f".format(iaSec)}s"
                 binding.tvTiempoManual.text = "Tiempo manual estimado: 15.5 min"
                 binding.tvAhorro.text = "Tiempo ahorrado: ${"%.1f".format(15.5 - iaSec/60.0)} min"
@@ -333,8 +406,12 @@ class AnalisisFragment : Fragment() {
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Error en análisis: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
+                isAnalyzing = false
                 binding.btnAnalizar.isEnabled = true
                 binding.boxUpload.isEnabled = true
+                showLoadingInView(false)
+                hideBlockingLoading()
+                refreshButtons()
             }
         }
     }
@@ -342,7 +419,8 @@ class AnalisisFragment : Fragment() {
     // --------------------------------------------------------------------------------------------
 
     override fun onDestroyView() {
-        super.onDestroyView()
+        hideBlockingLoading()
         _binding = null
+        super.onDestroyView()
     }
 }

@@ -30,6 +30,16 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Base64
 import android.util.Log
+
+// --- imports para el modal de carga programático ---
+import android.view.Gravity
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.appcompat.app.AlertDialog
+
 import java.security.MessageDigest
 
 class LoginActivity : AppCompatActivity() {
@@ -41,6 +51,11 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var googleClient: GoogleSignInClient
     private lateinit var callbackManager: CallbackManager
 
+    // --- Estado del loader ---
+    private var loadingDialog: AlertDialog? = null
+    private var loadingMessageView: TextView? = null
+
+    // Lanzador para Google
     private val googleLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
@@ -48,26 +63,86 @@ class LoginActivity : AppCompatActivity() {
                 val account = task.getResult(ApiException::class.java)
                 val credential = GoogleAuthProvider.getCredential(account.idToken, null)
                 CoroutineScope(Dispatchers.Main).launch {
-                    auth.signInWithCredential(credential).await()
-                    ensureProfile(
-                        nombres = account.givenName,
-                        apellidos = account.familyName,
-                        email = account.email
-                    )
-                    goToHome()
+                    showLoading("Autenticando con Google...")
+                    try {
+                        auth.signInWithCredential(credential).await()
+                        ensureProfile(
+                            nombres = account.givenName,
+                            apellidos = account.familyName,
+                            email = account.email
+                        )
+                        goToHome()
+                    } catch (e: Exception) {
+                        toast("Google sign-in falló: ${e.message}")
+                    } finally {
+                        hideLoading()
+                    }
                 }
             } catch (e: Exception) {
+                hideLoading() // por si estaba mostrando
                 toast("Google sign-in falló: ${e.message}")
             }
         }
 
+    // --- Utilidad dp -> px ---
+    private fun Int.dp(): Int = (this * resources.displayMetrics.density).toInt()
+
+    // --- Modal de carga reutilizable (sin XML) ---
+    private fun showLoading(message: String = "Cargando...") {
+        if (loadingDialog?.isShowing == true) {
+            loadingMessageView?.text = message
+            return
+        }
+
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(24.dp(), 24.dp(), 24.dp(), 24.dp())
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            gravity = Gravity.CENTER_HORIZONTAL
+        }
+
+        val progress = ProgressBar(this).apply {
+            isIndeterminate = true
+            val size = 48.dp()
+            layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+            }
+        }
+
+        loadingMessageView = TextView(this).apply {
+            text = message
+            setPadding(0, 16.dp(), 0, 0)
+            gravity = Gravity.CENTER_HORIZONTAL
+        }
+
+        container.addView(progress)
+        container.addView(loadingMessageView)
+
+        loadingDialog = MaterialAlertDialogBuilder(this)
+            .setView(container)
+            .setCancelable(false)
+            .create().also { dialog ->
+                dialog.setCanceledOnTouchOutside(false)
+                dialog.show()
+            }
+    }
+
+    private fun hideLoading() {
+        try {
+            loadingDialog?.dismiss()
+        } catch (_: Exception) { /* no-op */ }
+        loadingDialog = null
+        loadingMessageView = null
+    }
 
     private fun printFacebookKeyHash() {
         try {
             val pkg = packageName
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                // API 28+ usa SigningInfo
                 val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     packageManager.getPackageInfo(
                         pkg,
@@ -79,7 +154,6 @@ class LoginActivity : AppCompatActivity() {
                 }
 
                 val signingInfo = info.signingInfo
-                // signingInfo puede ser null en algunos escenarios -> null-safe
                 val sigs = when {
                     signingInfo == null -> emptyArray()
                     signingInfo.hasMultipleSigners() -> signingInfo.apkContentsSigners
@@ -94,7 +168,6 @@ class LoginActivity : AppCompatActivity() {
                 }
 
             } else {
-                // API < 28 usa signatures (deprecated, pero válido para compatibilidad)
                 @Suppress("DEPRECATION")
                 val info = packageManager.getPackageInfo(pkg, PackageManager.GET_SIGNATURES)
                 @Suppress("DEPRECATION")
@@ -132,6 +205,9 @@ class LoginActivity : AppCompatActivity() {
         googleClient = GoogleSignIn.getClient(this, gso)
 
         binding.btnGoogle.setOnClickListener {
+            // El flujo abre UI externa; mostramos loading sólo cuando iniciemos credenciales (ver googleLauncher)
+            // pero si quieres feedback inmediato al toque:
+            // showLoading("Abriendo Google...")
             googleLauncher.launch(googleClient.signInIntent)
         }
     }
@@ -148,6 +224,7 @@ class LoginActivity : AppCompatActivity() {
                         val token = result.accessToken ?: return
                         val credential = FacebookAuthProvider.getCredential(token.token)
                         CoroutineScope(Dispatchers.Main).launch {
+                            showLoading("Autenticando con Facebook...")
                             try {
                                 val res = auth.signInWithCredential(credential).await()
                                 val user = res.user
@@ -159,12 +236,16 @@ class LoginActivity : AppCompatActivity() {
                                 goToHome()
                             } catch (e: Exception) {
                                 toast("Facebook sign-in falló: ${e.message}")
+                            } finally {
+                                hideLoading()
                             }
                         }
                     }
 
                     override fun onCancel() { /* usuario canceló */ }
+
                     override fun onError(error: FacebookException) {
+                        hideLoading()
                         toast("Facebook error: ${error.message}")
                     }
                 })
@@ -180,12 +261,15 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             CoroutineScope(Dispatchers.Main).launch {
+                showLoading("Autenticando...")
                 try {
                     val res = auth.signInWithEmailAndPassword(email, pass).await()
                     ensureProfile(email = res.user?.email)
                     goToHome()
                 } catch (e: Exception) {
                     toast("Inicio de sesión falló: ${e.message}")
+                } finally {
+                    hideLoading()
                 }
             }
         }
@@ -203,7 +287,6 @@ class LoginActivity : AppCompatActivity() {
         email: String? = null
     ) {
         val uid = auth.currentUser?.uid ?: return
-        // Merge “soft”: si el doc existe se mantiene; si no, se crea con lo básico
         val userDoc = FirebaseFirestore.getInstance().collection("usuarios").document(uid).get().await()
         if (!userDoc.exists()) {
             userRepo.set(
@@ -217,7 +300,6 @@ class LoginActivity : AppCompatActivity() {
                 )
             )
         } else if (email != null) {
-            // Si existe, al menos asegura email (por si estaba vacío)
             userRepo.updateFields(uid, mapOf("email" to email))
         }
     }
@@ -233,5 +315,10 @@ class LoginActivity : AppCompatActivity() {
         // Necesario para Facebook LoginManager
         super.onActivityResult(requestCode, resultCode, data)
         callbackManager.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onDestroy() {
+        hideLoading()
+        super.onDestroy()
     }
 }

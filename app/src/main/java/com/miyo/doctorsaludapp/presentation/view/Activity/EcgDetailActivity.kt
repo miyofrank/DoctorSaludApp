@@ -129,12 +129,9 @@ class EcgDetailActivity : AppCompatActivity() {
         tvPrecision.text      = "Precisión de IA: —"
         tvRiesgo.text         = "Nivel de riesgo: —"
         tvParametros.text     = "FC: —  Ritmo: —  PR: —  QRS: —  QT: —  QTc: —"
-
         if (a == null) return@with
-
         val df0 = DecimalFormat("#0")
         val df1 = DecimalFormat("#0.0")
-
         val ritmo = a["ritmo"] as? String
         val fc    = (a["fc_bpm"] as? Number)?.toInt()
         val pr    = (a["pr_ms"] as? Number)?.toDouble()
@@ -147,7 +144,6 @@ class EcgDetailActivity : AppCompatActivity() {
         val recomendacion  = (a["recomendacion"] as? String)?.trim().orEmpty()
         val analyzedAt: Date? = (a["analyzedAt"] as? Timestamp)?.toDate()
             ?: (a["analyzedAt"] as? Date)
-
         // Texto
         tvInterpretacion.text = "Interpretación: " + (if (interpretacion.isBlank()) "—" else interpretacion)
         tvRecomendacion.text  = "Recomendación: "  + (if (recomendacion.isBlank()) "—" else recomendacion)
@@ -162,7 +158,6 @@ class EcgDetailActivity : AppCompatActivity() {
             append("QT: ");  append(qt ?.let { df1.format(it) } ?: "—"); append(" ms  ")
             append("QTc: "); append(qtc?.let { df1.format(it) } ?: "—"); append(" ms")
         }
-
         // Estilos según riesgo
         styleRiskChip(riesgo)
         binding.chipAnalizado.isVisible = analyzedAt != null

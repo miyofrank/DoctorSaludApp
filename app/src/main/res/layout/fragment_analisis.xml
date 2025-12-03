@@ -228,12 +228,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginTop="8dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Interpretación: "/>
-
                     <TextView
                         android:id="@+id/tvInterpretacion"
                         android:layout_width="0dp"
@@ -243,8 +237,9 @@
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
                         android:paddingTop="3dp"
+                        android:textSize="16sp"
                         android:paddingBottom="3dp"
-                        android:text="—"
+                        android:text="Interpretración"
                         android:textColor="@color/chip_green_text"/>
                 </LinearLayout>
 
@@ -253,6 +248,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
+                    android:textSize="16sp"
                     android:text="Precisión de IA: —"/>
 
                 <TextView
@@ -260,6 +256,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
+                    android:textSize="16sp"
                     android:text="Nivel de riesgo: —"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -290,6 +287,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    android:textSize="16sp"
                     android:text="FC: —   Ritmo: —   PR: —   QRS: —   QT: —   QTc: —"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -320,19 +318,63 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    android:textSize="16sp"
                     android:text="Tiempo con IA: —"/>
 
                 <TextView
                     android:id="@+id/tvTiempoManual"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textSize="16sp"
                     android:text="Tiempo manual estimado: —"/>
 
                 <TextView
                     android:id="@+id/tvAhorro"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textSize="16sp"
                     android:text="Tiempo ahorrado: —"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Recomendación"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/tvRecomendaciones"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_chip_green"
+                        android:layout_gravity="center"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:paddingTop="3dp"
+                        android:paddingBottom="3dp"
+                        android:textSize="16sp"
+                        android:textColor="@color/chip_green_text"
+                        android:text="—"/>
+                </LinearLayout>
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

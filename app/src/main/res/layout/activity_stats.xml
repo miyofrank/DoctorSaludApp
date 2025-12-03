@@ -80,21 +80,6 @@
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_marginTop="8dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:endIconMode="dropdown_menu">
-
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                    android:id="@+id/acGranularity"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Granularidad"
-                    android:inputType="none" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnApply"
@@ -323,4 +308,17 @@
         android:visibility="gone"
         android:layout_width="48dp"
         android:layout_height="48dp"/>
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:endIconMode="dropdown_menu">
+
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/acGranularity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Granularidad"
+            android:inputType="none" />
+    </com.google.android.material.textfield.TextInputLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,12 +1,10 @@
 package com.miyo.doctorsaludapp.presentation.view.activity
 
 import android.os.Bundle
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -23,7 +21,21 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.roundToInt
 
+/**
+ * Pantalla: Número EGC (por MES)
+ * - Sin selector de granularidad (siempre "month").
+ * - El gráfico muestra el TOTAL de EGC por mes.
+ * - KPI superior = suma de EGC del período.
+ *
+ * Nota de compatibilidad:
+ * Como no conocemos exactamente los nombres de campo del modelo,
+ * leemos de forma segura con reflexión:
+ *   - Etiqueta de mes: "monthLabel" | "label" | "month" | "period"
+ *   - Total mensual:   "totalEgc"   | "total" | "count" | "numEgc" | "value"
+ * Si tus nombres son otros, dímelos y lo fijo explícitamente.
+ */
 class IndicatorPrecisionActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityIndicatorPrecisionBinding
@@ -31,7 +43,6 @@ class IndicatorPrecisionActivity : AppCompatActivity() {
 
     private var selectedStart: Date? = null
     private var selectedEnd: Date? = null
-    private var selectedGran = "month"
     private val df = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,32 +52,27 @@ class IndicatorPrecisionActivity : AppCompatActivity() {
 
         setupUi()
         observe()
-        vm.load() // carga inicial con defaultFilters()
+        // Carga inicial (el VM debe asumir granularity = "month" por defecto)
+        vm.load()
     }
 
     private fun setupUi() = with(b) {
         toolbar.setNavigationOnClickListener { finish() }
         toolbar.title = "Número EGC"
 
+        // Oculta controles de granularidad si existen en el layout
+        acGranularity?.isVisible = false
+
         chart.description = Description().apply { text = "" }
         chart.axisLeft.setDrawGridLines(false)
+        chart.axisLeft.granularity = 1f
         chart.axisRight.isEnabled = false
         chart.xAxis.setDrawGridLines(false)
         chart.legend.isEnabled = false
 
-        // Calendarios
+        // Date pickers
         etStart.setOnClickListener { pickDate(true) }
         etEnd.setOnClickListener { pickDate(false) }
-
-        // Granularidad
-        val items = listOf("Día", "Mes", "Año")
-        (acGranularity as? AutoCompleteTextView)?.setAdapter(
-            ArrayAdapter(this@IndicatorPrecisionActivity, android.R.layout.simple_list_item_1, items)
-        )
-        acGranularity.setText("Mes", false)
-        acGranularity.setOnItemClickListener { _, _, pos, _ ->
-            selectedGran = when (pos) { 0 -> "day"; 2 -> "year"; else -> "month" }
-        }
 
         btnApply.setOnClickListener { applyFilters() }
     }
@@ -81,16 +87,17 @@ class IndicatorPrecisionActivity : AppCompatActivity() {
             if (isStart) { selectedStart = d; b.etStart.setText(df.format(d)) }
             else { selectedEnd = d; b.etEnd.setText(df.format(d)) }
         }
-        picker.show(supportFragmentManager, if (isStart) "start_precision" else "end_precision")
+        picker.show(supportFragmentManager, if (isStart) "start_ecg_total" else "end_ecg_total")
     }
 
     private fun applyFilters() {
         val f = StatsFilters(
             start = selectedStart ?: vm.state.value.filters.start,
             end = selectedEnd ?: vm.state.value.filters.end,
-            granularity = selectedGran
+            granularity = "month" // SIEMPRE por mes
         )
-        vm.setFilters(f); vm.load(f)
+        vm.setFilters(f)
+        vm.load(f)
     }
 
     private fun observe() {
@@ -99,15 +106,29 @@ class IndicatorPrecisionActivity : AppCompatActivity() {
                 vm.state.collect { s ->
                     b.progress.isVisible = s.loading
                     b.content.isVisible = !s.loading
-                    if (s.error != null) Toast.makeText(this@IndicatorPrecisionActivity, s.error, Toast.LENGTH_LONG).show()
+
+                    s.error?.let {
+                        Toast.makeText(this@IndicatorPrecisionActivity, it, Toast.LENGTH_LONG).show()
+                    }
 
                     s.data?.let { data ->
-                        b.tvKpi.text = data.avgPrecisionGlobal?.let { String.format(Locale.getDefault(), "%.1f%%", it) } ?: "—"
-                        b.tvSubtitle.text = "Número EGC promedio del período"
+                        // Labels y valores (totales de EGC por mes)
+                        val labels = data.monthly.map { readString(it, "monthLabel", "label", "month", "period") ?: "" }
+                        val values = data.monthly.map {
+                            readNumber(it, "totalEgc", "total", "count", "numEgc", "value") ?: 0.0
+                        }
 
-                        val labels = data.monthly.map { it.monthLabel }
-                        val entries = data.monthly.mapIndexed { i, m -> Entry(i.toFloat(), (m.avgPrecision ?: 0.0).toFloat()) }
-                        val set = LineDataSet(entries, "").apply { setDrawCircles(true) }
+                        // KPI: suma del período
+                        val totalPeriodo = values.sum().roundToInt()
+                        b.tvKpi.text = totalPeriodo.toString()
+                        b.tvSubtitle.text = "Número EGC del período"
+
+                        // Gráfico (totales por mes)
+                        val entries = values.mapIndexed { i, y -> Entry(i.toFloat(), y.toFloat()) }
+                        val set = LineDataSet(entries, "").apply {
+                            setDrawCircles(true)
+                            setDrawValues(false)
+                        }
                         b.chart.data = LineData(set)
                         b.chart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
                         b.chart.invalidate()
@@ -115,5 +136,34 @@ class IndicatorPrecisionActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    // -------------------- Utilidades de lectura segura --------------------
+
+    private fun readString(obj: Any, vararg fieldNames: String): String? {
+        for (name in fieldNames) {
+            try {
+                val f = obj.javaClass.getDeclaredField(name)
+                f.isAccessible = true
+                val v = f.get(obj)
+                if (v is String) return v
+            } catch (_: Exception) { /* siguiente nombre */ }
+        }
+        return null
+    }
+
+    private fun readNumber(obj: Any, vararg fieldNames: String): Double? {
+        for (name in fieldNames) {
+            try {
+                val f = obj.javaClass.getDeclaredField(name)
+                f.isAccessible = true
+                val v = f.get(obj)
+                when (v) {
+                    is Number -> return v.toDouble()
+                    is String -> return v.toDoubleOrNull()
+                }
+            } catch (_: Exception) { /* siguiente nombre */ }
+        }
+        return null
     }
 }

@@ -1,13 +1,10 @@
 package com.miyo.doctorsaludapp.presentation.view.activity
 
-import android.app.Activity
 import android.os.Bundle
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -25,6 +22,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Evaluación preoperatoria — SIEMPRE por MES (sin granularidad).
+ * - Filtros: Desde / Hasta.
+ * - Gráfico: tiempo ahorrado promedio por mes (en minutos).
+ * - KPI: tiempo ahorrado promedio del período.
+ */
 class IndicatorEvaluacionPreopActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityIndicatorEvaluacionPreopBinding
@@ -32,7 +35,6 @@ class IndicatorEvaluacionPreopActivity : AppCompatActivity() {
 
     private var selectedStart: Date? = null
     private var selectedEnd: Date? = null
-    private var selectedGran = "month"
     private val df = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,30 +44,26 @@ class IndicatorEvaluacionPreopActivity : AppCompatActivity() {
 
         setupUi()
         observe()
-        vm.load()
+        vm.load() // el VM debe asumir granularity="month" por defecto
     }
 
     private fun setupUi() = with(b) {
         toolbar.setNavigationOnClickListener { finish() }
         toolbar.title = "Evaluación preoperatoria"
 
+        // Ocultar por completo controles de granularidad si existen en el layout
+        try { acGranularity.isVisible = false } catch (_: Throwable) {}
+
         chart.description = Description().apply { text = "" }
         chart.axisLeft.setDrawGridLines(false)
+        chart.axisLeft.granularity = 1f
         chart.axisRight.isEnabled = false
         chart.xAxis.setDrawGridLines(false)
         chart.legend.isEnabled = false
 
+        // Calendarios
         etStart.setOnClickListener { pickDate(true) }
         etEnd.setOnClickListener { pickDate(false) }
-
-        val items = listOf("Día", "Mes", "Año")
-        (acGranularity as? AutoCompleteTextView)?.setAdapter(
-            ArrayAdapter(this@IndicatorEvaluacionPreopActivity, android.R.layout.simple_list_item_1, items)
-        )
-        acGranularity.setText("Mes", false)
-        acGranularity.setOnItemClickListener { _, _, pos, _ ->
-            selectedGran = when (pos) { 0 -> "day"; 2 -> "year"; else -> "month" }
-        }
 
         btnApply.setOnClickListener { applyFilters() }
     }
@@ -77,8 +75,13 @@ class IndicatorEvaluacionPreopActivity : AppCompatActivity() {
             .build()
         picker.addOnPositiveButtonClickListener { millis ->
             val d = Date(millis)
-            if (isStart) { selectedStart = d; b.etStart.setText(df.format(d)) }
-            else { selectedEnd = d; b.etEnd.setText(df.format(d)) }
+            if (isStart) {
+                selectedStart = d
+                b.etStart.setText(df.format(d))
+            } else {
+                selectedEnd = d
+                b.etEnd.setText(df.format(d))
+            }
         }
         picker.show(supportFragmentManager, if (isStart) "start_preop" else "end_preop")
     }
@@ -87,9 +90,10 @@ class IndicatorEvaluacionPreopActivity : AppCompatActivity() {
         val f = StatsFilters(
             start = selectedStart ?: vm.state.value.filters.start,
             end = selectedEnd ?: vm.state.value.filters.end,
-            granularity = selectedGran
+            granularity = "month" // SIEMPRE por mes
         )
-        vm.setFilters(f); vm.load(f)
+        vm.setFilters(f)
+        vm.load(f)
     }
 
     private fun observe() {
@@ -98,20 +102,31 @@ class IndicatorEvaluacionPreopActivity : AppCompatActivity() {
                 vm.state.collect { s ->
                     b.progress.isVisible = s.loading
                     b.content.isVisible = !s.loading
-                    if (s.error != null) Toast.makeText(this@IndicatorEvaluacionPreopActivity, s.error, Toast.LENGTH_LONG).show()
+
+                    s.error?.let {
+                        Toast.makeText(this@IndicatorEvaluacionPreopActivity, it, Toast.LENGTH_LONG).show()
+                    }
 
                     s.data?.let { data ->
-                        val avgManual = data.avgManualMinutes
+                        val avgManual = data.avgManualMinutes ?: 0.0
                         val saved = data.savedMinutes ?: 0.0
-                        b.tvKpi.text = String.format(Locale.getDefault(), "%.1f min", saved)
-                        b.tvSubtitle.text = "Tiempo ahorrado promedio (sobre manual ${String.format(Locale.getDefault(),"%.1f",avgManual)} min)"
 
+                        // KPI superior
+                        b.tvKpi.text = String.format(Locale.getDefault(), "%.1f min", saved)
+                        b.tvSubtitle.text = "Tiempo ahorrado promedio (sobre manual ${String.format(Locale.getDefault(), "%.1f", avgManual)} min)"
+
+                        // Eje X: etiqueta mensual; Eje Y: minutos ahorrados (manual - IA/60)
                         val labels = data.monthly.map { it.monthLabel }
                         val entries = data.monthly.mapIndexed { i, m ->
-                            val savedM = (avgManual - ( (m.avgIaSeconds ?: 0.0) / 60.0 )).coerceAtLeast(0.0)
+                            val iaSeconds = m.avgIaSeconds ?: 0.0
+                            val savedM = (avgManual - (iaSeconds / 60.0)).coerceAtLeast(0.0)
                             Entry(i.toFloat(), savedM.toFloat())
                         }
-                        val set = LineDataSet(entries, "").apply { setDrawCircles(true) }
+
+                        val set = LineDataSet(entries, "").apply {
+                            setDrawCircles(true)
+                            setDrawValues(false)
+                        }
                         b.chart.data = LineData(set)
                         b.chart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
                         b.chart.invalidate()

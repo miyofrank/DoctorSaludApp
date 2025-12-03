@@ -2,8 +2,6 @@ package com.miyo.doctorsaludapp.presentation.view.Activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -45,7 +43,8 @@ class StatsActivity : AppCompatActivity() {
 
     private var selectedStart: Date? = null
     private var selectedEnd: Date? = null
-    private var selectedGran = "month" // day|month|year
+    // Sin modularidad: SIEMPRE por mes
+    private val fixedGranularity = "month"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,21 +62,20 @@ class StatsActivity : AppCompatActivity() {
         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         b.etStart.setText(sdf.format(f.start))
         b.etEnd.setText(sdf.format(f.end))
-        selectedGran = f.granularity
-        (b.acGranularity as? AutoCompleteTextView)?.setText(
-            when (selectedGran) { "day" -> "Día"; "year" -> "Año"; else -> "Mes" }, false
-        )
     }
 
     private fun setupUi() = with(b) {
         toolbar.setNavigationOnClickListener { finish() }
+
+        // Ocultamos controles de granularidad si existen en el layout
+        try { acGranularity.isVisible = false } catch (_: Throwable) {}
 
         // Recycler tendencias
         adapter = MonthlyTrendAdapter()
         rvMonthly.layoutManager = LinearLayoutManager(this@StatsActivity)
         rvMonthly.adapter = adapter
 
-        // Gráficos
+        // Gráfico de riesgo (barras)
         riskChart.description = Description().apply { text = "" }
         riskChart.axisLeft.setDrawGridLines(false)
         riskChart.axisRight.isEnabled = false
@@ -85,20 +83,21 @@ class StatsActivity : AppCompatActivity() {
         riskChart.legend.isEnabled = false
         riskChart.setNoDataText("Sin datos para el período.")
 
+        // Gráfico de totales (línea) — AHORA muestra TOTAL de ECG por MES
         lineChart.description = Description().apply { text = "" }
         lineChart.axisLeft.setDrawGridLines(false)
         lineChart.axisRight.isEnabled = false
         lineChart.xAxis.setDrawGridLines(false)
         lineChart.legend.isEnabled = false
         lineChart.setNoDataText("Sin datos para el período.")
-        // Eje Y 0..100 y formato %
-        b.lineChart.axisLeft.apply {
+        // Eje Y sin formato de porcentaje (antes era % IA)
+        lineChart.axisLeft.apply {
             axisMinimum = 0f
-            axisMaximum = 100f
-            granularity = 10f
+            granularity = 1f
             valueFormatter = object : ValueFormatter() {
                 override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-                    return String.format(Locale.getDefault(), "%.0f%%", value)
+                    // Muestra enteros para totales
+                    return value.toInt().toString()
                 }
             }
         }
@@ -106,17 +105,6 @@ class StatsActivity : AppCompatActivity() {
         // Calendarios
         etStart.setOnClickListener { pickDate(true) }
         etEnd.setOnClickListener { pickDate(false) }
-
-// Granularidad
-        val items = arrayOf("Día", "Mes", "Año")
-        (b.acGranularity as? com.google.android.material.textfield.MaterialAutoCompleteTextView)?.apply {
-            setSimpleItems(items)
-            setOnItemClickListener { _, _, pos, _ ->
-                selectedGran = when (pos) { 0 -> "day"; 2 -> "year"; else -> "month" }
-            }
-            // opcional: abre el dropdown al tocar el campo
-            setOnClickListener { showDropDown() }
-        }
 
         // Aplicar filtros
         btnApply.setOnClickListener { applyFilters() }
@@ -183,7 +171,8 @@ class StatsActivity : AppCompatActivity() {
             return
         }
 
-        val f = StatsFilters(start = start, end = end, granularity = selectedGran)
+        // Sin modularidad: siempre "month"
+        val f = StatsFilters(start = start, end = end, granularity = fixedGranularity)
         vm.setFilters(f)
         vm.load(f)
     }
@@ -197,7 +186,7 @@ class StatsActivity : AppCompatActivity() {
                     s.error?.let { Toast.makeText(this@StatsActivity, it, Toast.LENGTH_LONG).show() }
                     val data = s.data ?: return@collect
 
-                    // KPIs
+                    // KPIs (se mantienen igual)
                     b.tvTotalPatients.text = data.totalPacientes.toString()
                     b.tvIaPrecision.text = data.avgPrecisionGlobal
                         ?.let { String.format(Locale.getDefault(), "%.1f%%", it) } ?: "—"
@@ -209,7 +198,7 @@ class StatsActivity : AppCompatActivity() {
                         String.format(Locale.getDefault(), "%.1f min", it)
                     } ?: "—"
 
-                    // Riesgo
+                    // Riesgo (barras)
                     val r = data.risk
                     val barEntries = listOf(
                         BarEntry(0f, r.bajo.toFloat()),
@@ -223,12 +212,17 @@ class StatsActivity : AppCompatActivity() {
                         IndexAxisValueFormatter(listOf("Bajo", "Moderado", "Alto", "Crítico"))
                     b.riskChart.invalidate()
 
-                    // Línea de precisión
+                    // Línea de TOTALES por mes (ANTES era % IA)
                     val labels = data.monthly.map { it.monthLabel }
-                    val lineEntries = data.monthly.mapIndexed { i, m ->
-                        Entry(i.toFloat(), (m.avgPrecision ?: 0.0).toFloat())
+                    val totalValues = data.monthly.map { monthlyTotal(it) } // Int
+
+                    val lineEntries = totalValues.mapIndexed { i, total ->
+                        Entry(i.toFloat(), total.toFloat())
                     }
-                    val lineSet = LineDataSet(lineEntries, "").apply { setDrawCircles(true) }
+                    val lineSet = LineDataSet(lineEntries, "").apply {
+                        setDrawCircles(true)
+                        setDrawValues(false)
+                    }
                     b.lineChart.data = LineData(lineSet)
                     b.lineChart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
                     b.lineChart.invalidate()
@@ -237,5 +231,33 @@ class StatsActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * Lee el TOTAL mensual de ECG del objeto de entrada.
+     * Intenta varias claves comunes para ser compatible con tu modelo:
+     *  - totalEgc (Int)
+     *  - count (Int)
+     *  - total (Int)
+     *  - numEgc (Int)
+     * Si no encuentra nada, devuelve 0.
+     */
+    private fun monthlyTotal(obj: Any): Int {
+        fun readIntField(name: String): Int? = try {
+            val f = obj.javaClass.getDeclaredField(name)
+            f.isAccessible = true
+            val v = f.get(obj)
+            when (v) {
+                is Number -> v.toInt()
+                is String -> v.toIntOrNull()
+                else -> null
+            }
+        } catch (_: Exception) { null }
+
+        return readIntField("totalEgc")
+            ?: readIntField("count")
+            ?: readIntField("total")
+            ?: readIntField("numEgc")
+            ?: 0
     }
 }

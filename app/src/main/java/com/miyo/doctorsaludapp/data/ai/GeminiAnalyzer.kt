@@ -11,6 +11,7 @@ import com.google.ai.client.generativeai.type.content
 import com.google.android.gms.common.api.ApiException
 import com.miyo.doctorsaludapp.domain.model.EcgAiResult
 import com.miyo.doctorsaludapp.domain.model.EcgAnalysis
+import com.miyo.doctorsaludapp.domain.model.Patient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -24,10 +25,12 @@ import javax.net.ssl.SSLHandshakeException
 object GeminiAnalyzer {
 
     private const val TAG = "GeminiAnalyzer"
-
+    val pdatos: Patient = Patient()
     private fun prompt(): String = """
         Eres un cardiólogo que interpreta ECG de 12 derivaciones en papel cuadriculado.
-
+        Datos del paciente:
+        - Edad: ${pdatos.edad} años.
+        - Género: ${pdatos.sexo}.
         Instrucciones:
         - Si hay texto impreso (FC, QTc, etc.), léelo. Si no existe, estima visualmente FC (lpm), PR, QRS, QT, QTc en ms.
         - Clasifica el ritmo en: Normal, Sinusal, FA, Taquicardia, Bradicardia, ST.
@@ -57,15 +60,16 @@ object GeminiAnalyzer {
         }
         val pct = when {
             p == null -> 98.0
-            p <= 1.0  -> p * 100.0
-            else      -> p
+            p <= 1.0 -> p * 100.0
+            else -> p
         }
         return pct.coerceIn(96.0, 100.0)
     }
 
     private fun extractJson(text: String?): String {
         if (text.isNullOrBlank()) return "{}"
-        val s = text.indexOf('{'); val e = text.lastIndexOf('}')
+        val s = text.indexOf('{');
+        val e = text.lastIndexOf('}')
         return if (s >= 0 && e > s) text.substring(s, e + 1) else text
     }
 
@@ -92,14 +96,17 @@ object GeminiAnalyzer {
             runCall(context, bmp1)
         } catch (t: Throwable) {
             // Retry con imagen más pequeña (~1MB)
-            Log.w(TAG, "Primer intento falló (${t::class.java.simpleName}: ${t.message}). Reintentando con imagen más pequeña…")
+            Log.w(
+                TAG,
+                "Primer intento falló (${t::class.java.simpleName}: ${t.message}). Reintentando con imagen más pequeña…"
+            )
             val jpeg2 = withContext(Dispatchers.Default) { toJpeg(bmp1, 1_000_000) }
             val bmp2 = BitmapFactory.decodeByteArray(jpeg2, 0, jpeg2.size) ?: bmp1
             runCall(context, bmp2) // si vuelve a fallar, dejamos que suba el error claro
         }
     }
 
-    private suspend fun runCall(context: Context, bmp: Bitmap): EcgAiResult {
+    private suspend fun runCall(context: Context, bmp: Bitmap, edad: Int? = null): EcgAiResult {
         val req: Content = content {
             text(prompt())
             image(bmp) // compatible con tu SDK
@@ -113,9 +120,9 @@ object GeminiAnalyzer {
             val code = e.statusCode
             val userMsg = when (code) {
                 401, 403 -> "API Key inválida o sin permisos (401/403)."
-                429      -> "Cuota alcanzada (429), intenta más tarde."
-                503      -> "Servicio ocupado (503), reintenta en unos segundos."
-                else     -> "Error de API ($code): ${e.message}"
+                429 -> "Cuota alcanzada (429), intenta más tarde."
+                503 -> "Servicio ocupado (503), reintenta en unos segundos."
+                else -> "Error de API ($code): ${e.message}"
             }
             throw IllegalStateException(userMsg, e)
         } catch (e: UnknownHostException) {
@@ -127,7 +134,10 @@ object GeminiAnalyzer {
         } catch (e: IOException) {
             throw IllegalStateException("Error de red: ${e.message}", e)
         } catch (t: Throwable) {
-            throw IllegalStateException("Fallo al invocar Gemini: ${t::class.java.simpleName}: ${t.message}", t)
+            throw IllegalStateException(
+                "Fallo al invocar Gemini: ${t::class.java.simpleName}: ${t.message}",
+                t
+            )
         }
 
         resp.promptFeedback?.blockReason?.let {
@@ -145,7 +155,13 @@ object GeminiAnalyzer {
         val o = try {
             JSONObject(json)
         } catch (e: Exception) {
-            throw IllegalStateException("Respuesta inesperada (no JSON). Vista previa: ${rawText.take(160)}", e)
+            throw IllegalStateException(
+                "Respuesta inesperada (no JSON). Vista previa: ${
+                    rawText.take(
+                        160
+                    )
+                }", e
+            )
         }
 
         val precision = normalizePrecision(o.opt("precisionIA"))
@@ -158,19 +174,21 @@ object GeminiAnalyzer {
         return EcgAiResult(
             ritmo = o.optString("ritmo", "Desconocido"),
             fc_bpm = if (o.isNull("fc_bpm")) null else o.optInt("fc_bpm"),
-            pr_ms  = if (o.isNull("pr_ms")) null else o.optDouble("pr_ms"),
+            pr_ms = if (o.isNull("pr_ms")) null else o.optDouble("pr_ms"),
             qrs_ms = if (o.isNull("qrs_ms")) null else o.optDouble("qrs_ms"),
-            qt_ms  = if (o.isNull("qt_ms")) null else o.optDouble("qt_ms"),
+            qt_ms = if (o.isNull("qt_ms")) null else o.optDouble("qt_ms"),
             qtc_ms = if (o.isNull("qtc_ms")) null else o.optDouble("qtc_ms"),
-            precisionIA   = precision,
-            nivelRiesgo   = riesgo,
-            interpretacion= o.optString("interpretacion", ""),
+            precisionIA = precision,
+            nivelRiesgo = riesgo,
+            interpretacion = o.optString("interpretacion", ""),
             recomendacion = o.optString("recomendacion", "")
         )
     }
 
     private fun downscaleIfNeeded(src: Bitmap, maxSide: Int): Bitmap {
-        val w = src.width; val h = src.height; val max = maxOf(w, h)
+        val w = src.width;
+        val h = src.height;
+        val max = maxOf(w, h)
         if (max <= maxSide) return src
         val s = maxSide.toFloat() / max
         val nw = (w * s).toInt().coerceAtLeast(1)

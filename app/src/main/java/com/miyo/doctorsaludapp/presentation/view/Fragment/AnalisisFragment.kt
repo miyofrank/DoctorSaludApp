@@ -1,8 +1,12 @@
 package com.miyo.doctorsaludapp.presentation.view.Fragment
 
 import android.content.Intent
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.StyleSpan
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -393,7 +397,17 @@ class AnalisisFragment : Fragment() {
 
                 // 4) Actualizar UI
                 val iaSec = durationMs / 1000.0
-                binding.tvInterpretacion.text = analysis.interpretacion ?: "—"
+                val valor = "${analysis.interpretacion ?: "—"}"
+                val label = "Interpretación: "
+                val spannable = SpannableString(label + valor)
+                spannable.setSpan(
+                    StyleSpan(Typeface.BOLD),
+                    0,
+                    label.length, // hasta el final de "Interpretación: "
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+
+                binding.tvInterpretacion.text = spannable
                 binding.tvPrecision.text = "Precisión de IA: ${analysis.precisionIA?.let { "%.1f".format(it) } ?: "—"}%"
                 binding.tvRiesgo.text = "Nivel de riesgo: ${analysis.nivelRiesgo ?: "—"}"
                 binding.tvParametros.text =
@@ -401,6 +415,9 @@ class AnalisisFragment : Fragment() {
                 binding.tvTiempoIA.text = "Tiempo con IA: ${"%.1f".format(iaSec)}s"
                 binding.tvTiempoManual.text = "Tiempo manual estimado: 15.5 min"
                 binding.tvAhorro.text = "Tiempo ahorrado: ${"%.1f".format(15.5 - iaSec/60.0)} min"
+                binding.tvRecomendaciones.text = analysis.recomendacion ?: "—"
+
+
 
                 Toast.makeText(requireContext(), "Análisis guardado", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {

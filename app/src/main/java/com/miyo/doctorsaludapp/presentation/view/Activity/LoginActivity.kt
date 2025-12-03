@@ -50,12 +50,8 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var googleClient: GoogleSignInClient
     private lateinit var callbackManager: CallbackManager
-
-    // --- Estado del loader ---
     private var loadingDialog: AlertDialog? = null
     private var loadingMessageView: TextView? = null
-
-    // Lanzador para Google
     private val googleLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
@@ -83,11 +79,7 @@ class LoginActivity : AppCompatActivity() {
                 toast("Google sign-in falló: ${e.message}")
             }
         }
-
-    // --- Utilidad dp -> px ---
     private fun Int.dp(): Int = (this * resources.displayMetrics.density).toInt()
-
-    // --- Modal de carga reutilizable (sin XML) ---
     private fun showLoading(message: String = "Cargando...") {
         if (loadingDialog?.isShowing == true) {
             loadingMessageView?.text = message
@@ -137,7 +129,6 @@ class LoginActivity : AppCompatActivity() {
         loadingDialog = null
         loadingMessageView = null
     }
-
     private fun printFacebookKeyHash() {
         try {
             val pkg = packageName
@@ -196,7 +187,6 @@ class LoginActivity : AppCompatActivity() {
         setupRegisterLink()
         printFacebookKeyHash()
     }
-
     private fun setupGoogle() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id)) // de google-services.json
@@ -211,7 +201,6 @@ class LoginActivity : AppCompatActivity() {
             googleLauncher.launch(googleClient.signInIntent)
         }
     }
-
     private fun setupFacebook() {
         callbackManager = CallbackManager.Factory.create()
         binding.btnFacebook.setOnClickListener {
@@ -251,7 +240,6 @@ class LoginActivity : AppCompatActivity() {
                 })
         }
     }
-
     private fun setupEmailLogin() {
         binding.btnLoginEmail.setOnClickListener {
             val email = binding.etEmail.text?.toString()?.trim().orEmpty()
@@ -274,13 +262,11 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun setupRegisterLink() {
         binding.tvGoRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
-
     private suspend fun ensureProfile(
         nombres: String? = null,
         apellidos: String? = null,

@@ -22,8 +22,7 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Preparamos el ViewPager con 4 fragments
+        // Preparamos el ViewPager con 4 fragments (TAPS)
         val fragments = listOf(
             HomeFragment(),
             PacienteFragment(),

@@ -9,7 +9,7 @@ object GeminiClient {
     // buildConfigField("String", "GOOGLE_AI_API_KEY", "\"TU_API_KEY\"")
 
     fun get(@Suppress("UNUSED_PARAMETER") context: Context): GenerativeModel {
-        val key = "AIzaSyBMI--OSZNa8ZrpPLg6xOMVQH6caIBX9FM"
+        val key = ""
         require(!key.isNullOrBlank() && key.length > 20) {
             "API Key de Gemini inválida o vacía (BuildConfig.GOOGLE_AI_API_KEY)."
         }

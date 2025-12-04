@@ -4,13 +4,17 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    alias(libs.plugins.google.firebase.appdistribution)
 }
+
 
 android {
     namespace = "com.miyo.doctorsaludapp"
     compileSdk = 36
 
-    defaultConfig {
+
+
+    defaultConfig({
         applicationId = "com.miyo.doctorsaludapp"
         minSdk = 26
         targetSdk = 34
@@ -18,7 +22,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
+
+    })
 
     buildTypes {
         release {
@@ -37,6 +42,9 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
+        buildConfig = true
+    }
+    buildFeatures {
         viewBinding = true
     }
     viewBinding {
@@ -47,6 +55,10 @@ android {
     }
     buildToolsVersion = "35.0.0"
     ndkVersion = "29.0.13113456 rc1"
+    defaultConfig {
+        buildConfigField("String", "GOOGLE_AI_API_KEY", "\"${project.findProperty("GOOGLE_AI_API_KEY") ?: ""}\"")
+    }
+
 }
 
 dependencies {
@@ -55,7 +67,15 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-//
+    // Graficos
+    implementation("com.github.PhilJay:MPAndroidChart:3.1.0")
+    // Coil imagen
+    implementation("io.coil-kt:coil:2.7.0")
+    // http
+    implementation("com.squareup.okhttp3:okhttp:5.1.0")
+    // Gemini AI
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    // Facebook
     implementation(libs.facebook.android.sdk.vlatestrelease)
     // Fragment
     implementation(libs.androidx.fragment.ktx)
@@ -74,6 +94,11 @@ dependencies {
     //DaggerHilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.annotation)
+    implementation(libs.firebase.appcheck.debug)
+    implementation(libs.firebase.appcheck.playintegrity)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
     kapt(libs.hilt.android.compiler)
     //Timber
     implementation (libs.timber)
@@ -105,5 +130,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation ("com.google.firebase:firebase-appcheck-playintegrity")
+    debugImplementation ("com.google.firebase:firebase-appcheck-debug")
 }
 apply(plugin = "dagger.hilt.android.plugin")

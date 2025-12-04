@@ -10,13 +10,35 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="default_web_client_id">YOUR_WEB_CLIENT_ID</string>
-    <string name="facebook_app_id">1234</string>
-    <string name="fb_login_protocol_scheme">fb1234</string>
-    <string name="facebook_client_token">56789</string>
+    <string name="facebook_app_id">485207894182831</string>
+    <string name="fb_login_protocol_scheme">fb485207894182831</string>
+    <string name="facebook_client_token">960390e71134880eb5b0772785c2ec76</string>
+    <string name="analizar_gemini">Analizar ahora</string>
+
 
     <string name="register_here">No tienes una cuenta aún? <font color="#ff0000">Registrate aquí</font></string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="estadisticas">Estadísticas</string>
+    <string name="filtros">Filtros</string>
+    <string name="selecciona_periodo">Selecciona periodo</string>
+    <string name="granularidad">Granularidad</string>
+    <string name="aplicar_filtros">Aplicar filtros</string>
+    <string name="resumen">Resumen</string>
+    <string name="total_pacientes">Total pacientes</string>
+    <string name="precision_ia">Precisión IA</string>
+    <string name="tiempo_ia">Tiempo IA</string>
+    <string name="tiempo_manual">Tiempo manual</string>
+    <string name="tiempo_ahorrado">Tiempo ahorrado</string>
+    <string name="distribucion_riesgo">Distribución de riesgo</string>
+    <string name="tendencia_por_periodo">Tendencia por período</string>
+    <string name="indicador_precision">Indicador: Precisión IA</string>
+    <string name="indicador_tiempo_ia">Indicador: Tiempo con IA</string>
+    <string name="indicador_riesgo">Indicador: Distribución de riesgo</string>
+    <string name="indicador_tiempo_manual">Indicador: Tiempo manual</string>
+    <string name="error_cargar_datos">No se pudieron cargar los datos.</string>
+    <string name="sin_datos_periodo">Sin ECGs registrados en el período.</string>
 
 
 </resources>
